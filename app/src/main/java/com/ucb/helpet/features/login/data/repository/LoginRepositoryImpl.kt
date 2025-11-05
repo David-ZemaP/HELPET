@@ -15,4 +15,13 @@ class LoginRepositoryImpl(private val loginRemoteDataSource: LoginRemoteDataSour
             Resource.Error(e.message ?: "An unknown error occurred")
         }
     }
+
+    override suspend fun forgotPassword(email: String) {
+        try {
+            loginRemoteDataSource.forgotPassword(email)
+        } catch (e: Exception) {
+            // In a real app, you'd want to log this or handle it more gracefully
+            println(e.message)
+        }
+    }
 }

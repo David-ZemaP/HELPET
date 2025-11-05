@@ -15,6 +15,11 @@ class RegisterViewModel(private val registerUserUseCase: RegisterUserUseCase) : 
     val email = MutableStateFlow("")
     val password = MutableStateFlow("")
     val userType = MutableStateFlow(UserType.CLIENT)
+    val phone = MutableStateFlow("")
+    val location = MutableStateFlow("")
+    val license = MutableStateFlow("")
+    val confirmPassword = MutableStateFlow("")
+    val termsAccepted = MutableStateFlow(false)
 
     private val _registerState = MutableStateFlow<Resource<Unit>>(Resource.Initial)
     val registerState: StateFlow<Resource<Unit>> = _registerState.asStateFlow()

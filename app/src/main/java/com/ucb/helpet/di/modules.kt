@@ -10,7 +10,9 @@ import com.ucb.helpet.features.login.domain.repository.LoginRepository
 import com.ucb.helpet.features.login.domain.usecase.GetTokenUseCase
 import com.ucb.helpet.features.login.domain.usecase.RegisterUserUseCase
 import com.ucb.helpet.features.login.domain.usecase.SaveTokenUseCase
+import com.ucb.helpet.features.login.domain.usecases.ForgotPasswordUseCase
 import com.ucb.helpet.features.login.presentation.LoginViewModel
+import com.ucb.helpet.features.login.presentation.forgotpassword.ForgotPasswordViewModel
 import com.ucb.helpet.features.login.presentation.register.RegisterViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -44,9 +46,11 @@ val appModule = module {
     factory { GetTokenUseCase(get()) }
     factory { SaveTokenUseCase(get()) }
     factory { RegisterUserUseCase(get()) }
+    factory { ForgotPasswordUseCase(get()) }
 
     // ViewModels
     viewModel { LoginViewModel(get(), get()) }
     viewModel { RegisterViewModel(get()) }
+    viewModel { ForgotPasswordViewModel(get()) }
 
 }
