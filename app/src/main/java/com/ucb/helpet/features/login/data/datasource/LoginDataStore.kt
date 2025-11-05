@@ -1,50 +1,41 @@
 package com.ucb.helpet.features.login.data.datasource
 
-
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.ucb.helpet.features.login.domain.repository.IRepositoryDataStore
 import kotlinx.coroutines.flow.first
 
 val Context.dataStore by preferencesDataStore(name = "user_preferences")
-class LoginDataStore (
+
+class LoginDataStore(
     private val context: Context
-) {
+) : IRepositoryDataStore {
     companion object {
-        val USER_NAME = stringPreferencesKey("user_name")
+        val USER_EMAIL = stringPreferencesKey("user_email")
         val TOKEN = stringPreferencesKey("token")
     }
 
-    suspend fun saveUserName(userName: String) {
-        context.dataStore.edit {
-                preferences -> preferences[USER_NAME] = userName
+    override suspend fun saveEmail(email: String) {
+        context.dataStore.edit { preferences ->
+            preferences[USER_EMAIL] = email
         }
     }
 
-    suspend fun getUserName(): Result<String> {
+    override suspend fun getEmail(): String {
         val preferences = context.dataStore.data.first()
-        return if (preferences[USER_NAME] != null) {
-            Result.success(preferences[USER_NAME]!!)
-        } else {
-            Result.failure(Exception("User name not found"))
+        return preferences[USER_EMAIL] ?: ""
+    }
+
+    override suspend fun saveToken(token: String) {
+        context.dataStore.edit { preferences ->
+            preferences[TOKEN] = token
         }
     }
 
-    suspend fun saveToken(token: String) {
-        context.dataStore.edit {
-                preferences -> preferences[TOKEN] = token
-        }
-    }
-
-    suspend fun getToken(): String {
+    override suspend fun getToken(): String {
         val preferences = context.dataStore.data.first()
-        return if (preferences[TOKEN] != null) {
-            preferences[TOKEN]!!
-        } else {
-            ""
-        }
+        return preferences[TOKEN] ?: ""
     }
-
-
 }
