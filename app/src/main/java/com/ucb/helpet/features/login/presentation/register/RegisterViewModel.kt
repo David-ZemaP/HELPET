@@ -11,29 +11,35 @@ import kotlinx.coroutines.launch
 
 class RegisterViewModel(private val registerUserUseCase: RegisterUserUseCase) : ViewModel() {
 
-    val name = MutableStateFlow("")
-    val email = MutableStateFlow("")
-    val password = MutableStateFlow("")
-    val userType = MutableStateFlow(UserType.CLIENT)
-    val phone = MutableStateFlow("")
-    val location = MutableStateFlow("")
-    val license = MutableStateFlow("")
-    val confirmPassword = MutableStateFlow("")
-    val termsAccepted = MutableStateFlow(false)
+    private val _uiState = MutableStateFlow<RegisterUiState>(RegisterUiState.Idle)
+    val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
 
-    private val _registerState = MutableStateFlow<Resource<Unit>>(Resource.Initial)
-    val registerState: StateFlow<Resource<Unit>> = _registerState.asStateFlow()
-
-    fun onRegisterClicked() {
+    fun register(name: String, email: String, password: String, userType: UserType) {
         viewModelScope.launch {
-            _registerState.value = Resource.Loading
-            val result = registerUserUseCase.invoke(
-                name.value,
-                email.value,
-                password.value,
-                userType.value
-            )
-            _registerState.value = result
+            _uiState.value = RegisterUiState.Loading
+
+            // Basic client-side validation
+            if (name.isBlank() || email.isBlank() || password.isBlank()) {
+                _uiState.value = RegisterUiState.Error("Por favor completa todos los campos obligatorios.")
+                return@launch
+            }
+            if (password.length < 8) {
+                 _uiState.value = RegisterUiState.Error("La contraseña debe tener al menos 8 caracteres.")
+                return@launch
+            }
+
+            when (val result = registerUserUseCase(name, email, password, userType)) {
+                is Resource.Success -> {
+                    _uiState.value = RegisterUiState.Success
+                }
+                is Resource.Error -> {
+                    _uiState.value = RegisterUiState.Error(result.message ?: "Ocurrió un error desconocido")
+                }
+                else -> {}
+            }
         }
+    }
+    fun resetState(){
+        _uiState.value = RegisterUiState.Idle
     }
 }

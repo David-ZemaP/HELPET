@@ -1,6 +1,5 @@
 package com.ucb.helpet.features.home.presentation
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,9 +17,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,30 +36,76 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.ucb.helpet.R
 import com.ucb.helpet.features.home.domain.model.Pet
+
+sealed class BottomNavItem(
+    val title: String,
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector,
+) {
+    object Home : BottomNavItem(
+        title = "Inicio",
+        selectedIcon = Icons.Filled.Home,
+        unselectedIcon = Icons.Outlined.Home,
+    )
+    object Search : BottomNavItem(
+        title = "Buscar",
+        selectedIcon = Icons.Filled.Search,
+        unselectedIcon = Icons.Outlined.Search,
+    )
+    object Rewards : BottomNavItem(
+        title = "Recompensas",
+        selectedIcon = Icons.Filled.Star,
+        unselectedIcon = Icons.Outlined.StarBorder,
+    )
+    object Donations : BottomNavItem(
+        title = "Donaciones",
+        selectedIcon = Icons.Filled.Favorite,
+        unselectedIcon = Icons.Outlined.FavoriteBorder,
+    )
+    object Profile : BottomNavItem(
+        title = "Perfil",
+        selectedIcon = Icons.Filled.Person,
+        unselectedIcon = Icons.Outlined.Person,
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen() {
+
+    val items = listOf(
+        BottomNavItem.Home,
+        BottomNavItem.Search,
+        BottomNavItem.Rewards,
+        BottomNavItem.Donations,
+        BottomNavItem.Profile
+    )
+    var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -69,144 +123,174 @@ fun HomeScreen() {
                     }
                 }
             )
-        }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFFE0F7FA),
-                            Color.White
-                        )
+        },
+        bottomBar = {
+            NavigationBar {
+                items.forEachIndexed { index, item ->
+                    NavigationBarItem(
+                        selected = selectedItemIndex == index,
+                        onClick = { selectedItemIndex = index },
+                        label = { Text(text = item.title) },
+                        alwaysShowLabel = true,
+                        icon = {
+                            Icon(
+                                imageVector = if (index == selectedItemIndex) item.selectedIcon else item.unselectedIcon,
+                                contentDescription = item.title
+                            )
+                        }
                     )
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Icon(
-                    imageVector = Icons.Default.FavoriteBorder,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .padding(16.dp),
-                    tint = Color.White
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "Reúne a las mascotas con sus familias",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "Conecta con una comunidad que se preocupa. Encuentra mascotas perdidas y ayuda a otros con recompensas justas.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 32.dp)
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Button(
-                    onClick = { /*TODO*/ },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                        Text(text = "Buscar Mascotas", modifier = Modifier.padding(start = 8.dp))
-                    }
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedButton(
-                    onClick = { /*TODO*/ },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = null)
-                        Text(text = "Reportar Perdida", modifier = Modifier.padding(start = 8.dp))
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    StatCard("1,247", "Mascotas Reunidas")
-                    StatCard("45.6", "ETH en Recompensas")
-                    StatCard("892", "Usuarios Activos")
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Text(
-                    text = "Mascotas Reportadas Recientemente",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
             }
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            when (selectedItemIndex) {
+                0 -> HomeContent()
+                1 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Search.title) }
+                2 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Rewards.title) }
+                3 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Donations.title) }
+                4 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Profile.title) }
+            }
+        }
+    }
+}
 
-            val pets = listOf(
-                Pet("Luna", "Perro", "Palermo, Buenos Aires", "Perdido", "https://i.imgur.com/8zQ2X9C.png"),
-                Pet("Michi", "Gato", "Recoleta, Buenos Aires", "Encontrado", "https://i.imgur.com/8zQ2X9C.png")
+@Composable
+fun HomeContent() {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFE0F7FA),
+                        Color.White
+                    )
+                )
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        item {
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Icon(
+                imageVector = Icons.Default.FavoriteBorder,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .padding(16.dp),
+                tint = Color.White
             )
 
-            items(pets) { pet ->
-                PetCard(pet)
-            }
+            Spacer(modifier = Modifier.height(16.dp))
 
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedButton(
-                    onClick = { /* TODO */ },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp)
-                ) {
-                    Text(text = "Ver Todas las Mascotas")
+            Text(
+                text = "Reúne a las mascotas con sus familias",
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Conecta con una comunidad que se preocupa. Encuentra mascotas perdidas y ayuda a otros con recompensas justas.",
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 32.dp)
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Button(
+                onClick = { /*TODO*/ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                    Text(text = "Buscar Mascotas", modifier = Modifier.padding(start = 8.dp))
                 }
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Text(
-                    text = "¿Cómo Funciona?",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                HowItWorksStep(icon = { Icon(Icons.Default.Search, null) }, title = "Reporta", description = "Reporta tu mascota perdida o una que hayas encontrado con fotos y detalles.")
-                HowItWorksStep(icon = { Icon(Icons.Default.FavoriteBorder, null) }, title = "Conecta", description = "Nuestra comunidad ayuda a encontrar coincidencias y conectar dueños.")
-                HowItWorksStep(icon = { Icon(Icons.Default.FavoriteBorder, null) }, title = "Recompensa", description = "Recibe recompensas en tokens HELP por ayudar a reunir mascotas.")
-
-                Spacer(modifier = Modifier.height(32.dp))
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedButton(
+                onClick = { /*TODO*/ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = null)
+                    Text(text = "Reportar Perdida", modifier = Modifier.padding(start = 8.dp))
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                StatCard("1,247", "Mascotas Reunidas")
+                StatCard("45.6", "ETH en Recompensas")
+                StatCard("892", "Usuarios Activos")
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = "Mascotas Reportadas Recientemente",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        val pets = listOf(
+            Pet("Luna", "Perro", "Palermo, Buenos Aires", "Perdido", "https://i.imgur.com/8zQ2X9C.png"),
+            Pet("Michi", "Gato", "Recoleta, Buenos Aires", "Encontrado", "https://i.imgur.com/8zQ2X9C.png")
+        )
+
+        items(pets) { pet ->
+            PetCard(pet)
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedButton(
+                onClick = { /* TODO */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp)
+            ) {
+                Text(text = "Ver Todas las Mascotas")
+            }
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = "¿Cómo Funciona?",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            HowItWorksStep(icon = { Icon(Icons.Default.Search, null) }, title = "Reporta", description = "Reporta tu mascota perdida o una que hayas encontrado con fotos y detalles.")
+            HowItWorksStep(icon = { Icon(Icons.Default.FavoriteBorder, null) }, title = "Conecta", description = "Nuestra comunidad ayuda a encontrar coincidencias y conectar dueños.")
+            HowItWorksStep(icon = { Icon(Icons.Default.FavoriteBorder, null) }, title = "Recompensa", description = "Recibe recompensas en tokens HELP por ayudar a reunir mascotas.")
+
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
@@ -320,7 +404,6 @@ fun PetCard(pet: Pet) {
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

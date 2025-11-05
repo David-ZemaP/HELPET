@@ -6,4 +6,7 @@ import com.ucb.helpet.utils.Resource
 interface LoginRepository {
     suspend fun registerUser(name: String, email: String, password: String, userType: UserType): Resource<Unit>
     suspend fun forgotPassword(email: String)
+    suspend fun login(email: String, password: String): Resource<Unit>
+    suspend fun isUserLoggedIn(): Boolean
+    suspend fun logout()
 }

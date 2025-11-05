@@ -91,4 +91,7 @@ dependencies {
 
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
+    implementation("androidx.compose.material:material-icons-extended-android:1.6.8")
+
 }
