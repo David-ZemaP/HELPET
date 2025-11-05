@@ -58,8 +58,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import coil3.compose.AsyncImage
 import com.ucb.helpet.features.home.domain.model.Pet
+import com.ucb.helpet.features.profile.presentation.ProfileScreen
 
 sealed class BottomNavItem(
     val title: String,
@@ -95,7 +98,7 @@ sealed class BottomNavItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
 
     val items = listOf(
         BottomNavItem.Home,
@@ -149,7 +152,14 @@ fun HomeScreen() {
                 1 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Search.title) }
                 2 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Rewards.title) }
                 3 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Donations.title) }
-                4 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Profile.title) }
+                4 -> ProfileScreen(onLogout = {
+                    navController.navigate("login") {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                })
             }
         }
     }
@@ -408,5 +418,5 @@ fun PetCard(pet: Pet) {
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen()
+    // Can't preview this directly as it needs a NavController.
 }
