@@ -1,33 +1,13 @@
 {
   "project_info": {
-    "project_number": "777489981135",
-    "firebase_url": "https://ucbp1-dfd7f-default-rtdb.firebaseio.com",
-    "project_id": "ucbp1-dfd7f",
-    "storage_bucket": "ucbp1-dfd7f.firebasestorage.app"
+    "project_number": "212025412109",
+    "project_id": "helpet-da46f",
+    "storage_bucket": "helpet-da46f.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:777489981135:android:43a903491f62e8f90221ba",
-        "android_client_info": {
-          "package_name": "com.calyrsoft.ucbp1"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyD7seDzZ2Y9OF8Nc07SDd1CFQ886qApaR4"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:777489981135:android:c3873e67c47325a70221ba",
+        "mobilesdk_app_id": "1:212025412109:android:818b5992b0f95d983fe344",
         "android_client_info": {
           "package_name": "com.ucb.helpet"
         }
@@ -35,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyD7seDzZ2Y9OF8Nc07SDd1CFQ886qApaR4"
+          "current_key": "AIzaSyBSeM2Oo_ZdMPIkoOweEmQchAT0XSUGvm0"
         }
       ],
       "services": {
