@@ -17,6 +17,7 @@ class LoginRepositoryImpl(
             remoteDataSource.register(name, email, password, userType)
             Resource.Success(Unit)
         } catch (e: Exception) {
+            // Catches the exception thrown by the remoteDataSource and passes its message
             Resource.Error(e.message ?: "An unknown error occurred")
         }
     }
@@ -25,7 +26,9 @@ class LoginRepositoryImpl(
         try {
             remoteDataSource.forgotPassword(email)
         } catch (e: Exception) {
-            println(e.message)
+            // Propagate exception if necessary, or just log/handle
+            println("Forgot Password Error: ${e.message}")
+            throw e
         }
     }
 
@@ -45,6 +48,7 @@ class LoginRepositoryImpl(
     }
 
     override suspend fun logout() {
+        remoteDataSource.logout()
         authTokenDao.deleteToken()
     }
 }
