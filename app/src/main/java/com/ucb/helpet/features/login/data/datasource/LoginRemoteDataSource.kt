@@ -1,5 +1,6 @@
 package com.ucb.helpet.features.login.data.datasource
 
+import com.google.firebase.database.FirebaseDatabase
 import com.ucb.helpet.features.login.data.api.FirebaseService
 import com.ucb.helpet.features.login.data.model.LoginResponse
 import com.ucb.helpet.features.login.domain.model.User
@@ -8,53 +9,69 @@ import kotlinx.coroutines.tasks.await
 
 class LoginRemoteDataSource(private val firebaseService: FirebaseService) {
 
-    private val usersRef = firebaseService.database.getReference("users")
+    // IMPORTANT: Reference the Realtime Database instance from FirebaseService
+    private val usersRef = FirebaseDatabase.getInstance().getReference("users")
 
     suspend fun register(name: String, email: String, password: String, userType: UserType) {
-        // Sanitize email to use it as a key in Firebase, as keys cannot contain '.'
-        val userKey = email.replace(".", "_dot_")
+        try {
+            // 1. Authenticate and create user using Firebase Auth
+            val authResult = firebaseService.auth.createUserWithEmailAndPassword(email, password).await()
+            val firebaseUser = authResult.user ?: throw Exception("Error al crear el usuario. Intenta de nuevo.")
 
-        // Check if a user with this email already exists
-        val existingUserSnapshot = usersRef.child(userKey).get().await()
-        if (existingUserSnapshot.exists()) {
-            throw Exception("Un usuario con este email ya existe.")
+            // 2. Save auxiliary user data (using the secure Firebase Auth UID as the key)
+            val user = User(
+                userId = firebaseUser.uid,
+                name = name,
+                email = email,
+                password = "", // Empty password here since Firebase Auth handles it securely
+                userType = userType
+            )
+            usersRef.child(firebaseUser.uid).setValue(user).await()
+        } catch (e: Exception) {
+            // Provide user-friendly errors for registration failures
+            val errorMessage = when (e.message) {
+                "The email address is already in use by another account." -> "Ya existe una cuenta con este correo."
+                "The password must be 6 characters long or more." -> "La contraseña debe tener al menos 6 caracteres."
+                else -> e.message ?: "Error desconocido durante el registro."
+            }
+            throw Exception(errorMessage)
         }
-
-        // Create a new user object and save it to Firebase
-        val user = User(
-            userId = userKey,
-            name = name,
-            email = email,
-            password = password, // WARNING: Storing plain text passwords is not secure for production.
-            userType = userType
-        )
-        usersRef.child(userKey).setValue(user).await()
     }
 
     suspend fun login(email: String, password: String): LoginResponse {
-        val userKey = email.replace(".", "_dot_")
+        return try {
+            // 1. Sign in user using Firebase Auth
+            val authResult = firebaseService.auth.signInWithEmailAndPassword(email, password).await()
+            val firebaseUser = authResult.user ?: throw Exception("Error al iniciar sesión.")
 
-        val userSnapshot = usersRef.child(userKey).get().await()
-
-        if (!userSnapshot.exists()) {
-            throw Exception("Usuario no encontrado.")
+            // 2. On successful login, return the secure UID as the session token
+            return LoginResponse(token = firebaseUser.uid)
+        } catch (e: Exception) {
+            // Provide user-friendly errors for login failures
+            val errorMessage = when {
+                e.message?.contains("There is no user record corresponding to this identifier") == true ||
+                        e.message?.contains("INVALID_LOGIN_CREDENTIALS") == true -> "Credenciales incorrectas. Verifica tu email y contraseña."
+                else -> e.message ?: "Fallo al iniciar sesión."
+            }
+            throw Exception(errorMessage)
         }
-
-        val user = userSnapshot.getValue(User::class.java)
-            ?: throw Exception("Error al procesar los datos del usuario.")
-
-        if (user.password != password) {
-            throw Exception("Contraseña incorrecta.")
-        }
-
-        // On successful login, return a LoginResponse.
-        // For simplicity, we'll use the user's ID (the sanitized email) as the session token.
-        return LoginResponse(token = user.userId)
     }
 
     suspend fun forgotPassword(email: String) {
-        // This functionality typically requires Firebase Auth. 
-        // For Realtime Database only, this is not straightforward.
-        throw NotImplementedError("La funcionalidad de recuperar contraseña aún no está implementada con Firebase.")
+        try {
+            // Use Firebase Auth to send password reset email
+            firebaseService.auth.sendPasswordResetEmail(email).await()
+        } catch (e: Exception) {
+            // Provide user-friendly errors for password reset failures
+            val errorMessage = when {
+                e.message?.contains("There is no user record corresponding to this identifier") == true -> "Usuario no encontrado para el email: $email"
+                e.message?.contains("The email address is badly formatted") == true -> "Formato de correo electrónico incorrecto."
+                else -> e.message ?: "Error desconocido al enviar el email de restablecimiento."
+            }
+            throw Exception(errorMessage)
+        }
+    }
+    fun logout() {
+        firebaseService.auth.signOut()
     }
 }
