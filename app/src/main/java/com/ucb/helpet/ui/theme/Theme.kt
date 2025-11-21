@@ -5,29 +5,43 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = VioletButton,          // Botones principales
+    onPrimary = White,
+    primaryContainer = VioletIconBackground,
+    onPrimaryContainer = VioletPrimary,
+
+    background = DarkBackground,     // Fondo de pantalla general
+    onBackground = TextWhite,
+
+    surface = CardBackground,        // Fondo de tarjetas
+    onSurface = TextWhite,
+
+    surfaceVariant = InputBackground, // Fondo de inputs (opcional, para componentes variant)
+    onSurfaceVariant = TextGray,
+
+    error = RedError,
+    onError = White,
+
+    outline = BorderColor,
+    outlineVariant = InputBackground
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-)
+// Por ahora, forzaremos el esquema oscuro para que coincida con tu diseño de Figma,
+// o puedes mantener un esquema claro separado si lo deseas.
+// Aquí configuro el LightColorScheme igual que el Dark para mantener consistencia visual inmediata.
+private val LightColorScheme = DarkColorScheme
 
 @Composable
 fun HelpetTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) {
-        DarkColorScheme
-    } else {
-        LightColorScheme
-    }
+    // Si quieres soportar modo claro real en el futuro, cambia esta lógica.
+    // Por ahora, priorizamos tu diseño oscuro.
+    val colorScheme = DarkColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,

@@ -148,7 +148,8 @@ fun HomeScreen(navController: NavController) {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedItemIndex) {
-                0 -> HomeContent()
+                // CORRECCIÓN 1: Pasamos el navController a HomeContent
+                0 -> HomeContent(navController)
                 1 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Search.title) }
                 2 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Rewards.title) }
                 3 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Donations.title) }
@@ -166,15 +167,15 @@ fun HomeScreen(navController: NavController) {
 }
 
 @Composable
-fun HomeContent() {
+fun HomeContent(navController: NavController) { // CORRECCIÓN 2: Recibimos navController como parámetro
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFFE0F7FA),
-                        Color.White
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                        MaterialTheme.colorScheme.background
                     )
                 )
             ),
@@ -230,7 +231,7 @@ fun HomeContent() {
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedButton(
-                onClick = { /*TODO*/ },
+                onClick = { navController.navigate("report_pet") }, // Ahora sí funciona
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 32.dp)
@@ -266,9 +267,22 @@ fun HomeContent() {
             Spacer(modifier = Modifier.height(16.dp))
         }
 
+        // CORRECCIÓN 3: Usamos parámetros nombrados para evitar errores con el nuevo modelo Pet
         val pets = listOf(
-            Pet("Luna", "Perro", "Palermo, Buenos Aires", "Perdido", "https://i.imgur.com/8zQ2X9C.png"),
-            Pet("Michi", "Gato", "Recoleta, Buenos Aires", "Encontrado", "https://i.imgur.com/8zQ2X9C.png")
+            Pet(
+                name = "Luna",
+                type = "Perro",
+                location = "Palermo, Buenos Aires",
+                status = "Perdido",
+                imageUrl = "https://i.imgur.com/8zQ2X9C.png"
+            ),
+            Pet(
+                name = "Michi",
+                type = "Gato",
+                location = "Recoleta, Buenos Aires",
+                status = "Encontrado",
+                imageUrl = "https://i.imgur.com/8zQ2X9C.png"
+            )
         )
 
         items(pets) { pet ->
@@ -305,6 +319,7 @@ fun HomeContent() {
     }
 }
 
+// ... Resto del código (HowItWorksStep, StatCard, PetCard) se mantiene igual ...
 @Composable
 fun HowItWorksStep(icon: @Composable () -> Unit, title: String, description: String) {
     Row(
@@ -413,10 +428,4 @@ fun PetCard(pet: Pet) {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    // Can't preview this directly as it needs a NavController.
 }

@@ -37,9 +37,9 @@ fun ProfileScreen(onLogout: () -> Unit, viewModel: ProfileViewModel = koinViewMo
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { /* TODO */ },
-                containerColor = Color(0xFF1DE9B6)
+                containerColor = MaterialTheme.colorScheme.secondary // Usa el GreenAction (#34D399)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Nueva Publicación", tint = Color.Black)
+                Icon(Icons.Default.Add, contentDescription = "Nueva Publicación", tint = Color.White)
             }
         }
     ) { paddingValues ->

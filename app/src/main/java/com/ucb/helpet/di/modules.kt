@@ -1,5 +1,10 @@
 package com.ucb.helpet.di
 
+import com.ucb.helpet.features.home.data.datasource.PetRemoteDataSource
+import com.ucb.helpet.features.home.domain.repository.PetRepository
+import com.ucb.helpet.features.home.domain.repository.PetRepositoryImpl
+import com.ucb.helpet.features.home.domain.usecase.ReportPetUseCase
+import com.ucb.helpet.features.home.presentation.report.ReportPetViewModel
 import com.ucb.helpet.features.login.data.api.FirebaseService
 import com.ucb.helpet.features.login.data.database.AppDatabase
 import com.ucb.helpet.features.login.data.datasource.LoginRemoteDataSource
@@ -34,12 +39,16 @@ val appModule = module {
     // Repositories
     single<LoginRepository> { LoginRepositoryImpl(get(), get()) }
 
+    single { PetRemoteDataSource() }
+    single<PetRepository> { PetRepositoryImpl(get()) }
+
     // UseCases
     factory { RegisterUserUseCase(get()) }
     factory { ForgotPasswordUseCase(get()) } // Will be refactored later for Firebase
     factory { LoginUseCase(get()) }
     factory { IsUserLoggedInUseCase(get()) }
     factory { LogoutUseCase(get()) }
+    factory { ReportPetUseCase(get(), get()) }
 
     // ViewModels
     viewModel { LoginViewModel(get(), get()) }
@@ -47,4 +56,5 @@ val appModule = module {
     viewModel { ForgotPasswordViewModel(get()) } // Will be refactored later for Firebase
     viewModel { SplashViewModel(get()) }
     viewModel { ProfileViewModel(get()) }
+    viewModel { ReportPetViewModel(get()) }
 }
