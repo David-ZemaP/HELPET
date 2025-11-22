@@ -24,11 +24,19 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.ucb.helpet.features.login.domain.model.User
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.foundation.lazy.items // Import this
+import com.ucb.helpet.features.home.domain.model.Pet // Import Pet model
+import com.ucb.helpet.features.home.presentation.PetCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(onLogout: () -> Unit, viewModel: ProfileViewModel = koinViewModel()) {
-    val uiState by viewModel.uiState.collectAsState() // Need to collect ProfileUiState
+fun ProfileScreen(
+    onLogout: () -> Unit,
+    onReportPetClick: () -> Unit,
+    onPetClick: (Pet) -> Unit,
+    viewModel: ProfileViewModel = koinViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(key1 = Unit) {
         viewModel.logoutEvent.collect {
@@ -39,7 +47,7 @@ fun ProfileScreen(onLogout: () -> Unit, viewModel: ProfileViewModel = koinViewMo
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* TODO */ },
+                onClick = onReportPetClick,
                 containerColor = MaterialTheme.colorScheme.secondary
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Nueva Publicación", tint = Color.White)
@@ -47,8 +55,8 @@ fun ProfileScreen(onLogout: () -> Unit, viewModel: ProfileViewModel = koinViewMo
         }
     ) { paddingValues ->
 
-        // Check State
-        when(val state = uiState) {
+        // FIX: Added Loading and Error branches
+        when (val state = uiState) {
             is ProfileUiState.Loading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -56,11 +64,15 @@ fun ProfileScreen(onLogout: () -> Unit, viewModel: ProfileViewModel = koinViewMo
             }
             is ProfileUiState.Error -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Error: ${state.message}")
+                    Text(
+                        text = "Error: ${state.message}",
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             }
             is ProfileUiState.Success -> {
-                val user = state.user // Get user from state
+                val user = state.user
+                val pets = state.pets
 
                 var selectedTabIndex by remember { mutableIntStateOf(0) }
                 val tabs = listOf("Publicaciones", "Ayudas", "Configuración")
@@ -71,9 +83,9 @@ fun ProfileScreen(onLogout: () -> Unit, viewModel: ProfileViewModel = koinViewMo
                         .padding(paddingValues)
                 ) {
                     item {
-                        ProfileHeader(user) // Pass User
+                        ProfileHeader(user)
                         Spacer(modifier = Modifier.height(16.dp))
-                        ProfileStats()
+                        ProfileStats(petsCount = pets.size.toString())
                         Spacer(modifier = Modifier.height(16.dp))
                         TabRow(selectedTabIndex = selectedTabIndex) {
                             tabs.forEachIndexed { index, title ->
@@ -87,9 +99,9 @@ fun ProfileScreen(onLogout: () -> Unit, viewModel: ProfileViewModel = koinViewMo
                     }
 
                     when (selectedTabIndex) {
-                        0 -> publicationsTab()
+                        0 -> publicationsTab(pets, onPetClick)
                         1 -> ayudasTab()
-                        2 -> configuracionTab(viewModel, user) // Pass User
+                        2 -> configuracionTab(viewModel, user)
                     }
                 }
             }
@@ -159,23 +171,39 @@ fun ProfileHeader(user: User) {
 }
 
 @Composable
-fun ProfileStats() {
-    // (Existing code)
+fun ProfileStats(petsCount: String = "0") {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceAround
     ) {
         StatItem(value = "0", label = "Mascotas Ayudadas")
         StatItem(value = "0 HELP", label = "Total Ganado", isHighlighted = true)
-        StatItem(value = "0", label = "Publicaciones", isHighlighted = true, highlightColor = Color(0xFFFFA000))
+        StatItem(
+            value = petsCount, // Use real count
+            label = "Publicaciones",
+            isHighlighted = true,
+            highlightColor = Color(0xFFFFA000)
+        )
     }
 }
 
-fun LazyListScope.publicationsTab() {
+// Update publicationsTab to render list
+fun LazyListScope.publicationsTab(pets: List<Pet>, onPetClick: (Pet) -> Unit) {
     item {
         Text("Mis Publicaciones", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleLarge)
     }
-    // Add mock items or empty state
+
+    if (pets.isEmpty()) {
+        item {
+            Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                Text("No tienes publicaciones aún.", color = Color.Gray)
+            }
+        }
+    } else {
+        items(pets) { pet ->
+            PetCard(pet = pet, onDetailClick = onPetClick)
+        }
+    }
 }
 
 fun LazyListScope.ayudasTab() {

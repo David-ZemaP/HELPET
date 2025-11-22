@@ -2,7 +2,9 @@ package com.ucb.helpet.features.home.presentation.report
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ucb.helpet.features.home.domain.usecase.ReportPetUseCase
+import com.ucb.helpet.features.home.domain.model.Pet
+import com.ucb.helpet.features.home.domain.repository.PetRepository
+import com.ucb.helpet.features.login.domain.repository.LoginRepository
 import com.ucb.helpet.utils.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,26 +18,43 @@ sealed class ReportPetUiState {
 }
 
 class ReportPetViewModel(
-    private val reportPetUseCase: ReportPetUseCase
+    private val repository: PetRepository,
+    private val loginRepository: LoginRepository // Changed from IRepositoryDataStore
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ReportPetUiState>(ReportPetUiState.Idle)
     val uiState: StateFlow<ReportPetUiState> = _uiState
 
-    fun reportPet(name: String, type: String, location: String, description: String, status: String) {
+    fun reportPet(pet: Pet) {
         viewModelScope.launch {
             _uiState.value = ReportPetUiState.Loading
 
-            if (name.isBlank() || location.isBlank() || type.isBlank()) {
-                _uiState.value = ReportPetUiState.Error("Por favor completa los campos obligatorios")
+            if (pet.name.isBlank() || pet.type.isBlank() || pet.location.isBlank()) {
+                _uiState.value = ReportPetUiState.Error("Por favor completa los campos obligatorios (*)")
                 return@launch
             }
 
-            val result = reportPetUseCase(name, type, location, description, status)
-            when (result) {
-                is Resource.Success -> _uiState.value = ReportPetUiState.Success
-                is Resource.Error -> _uiState.value = ReportPetUiState.Error(result.message)
-                else -> {}
+            try {
+                // Get the real User ID from the active session
+                var ownerId = ""
+                val userProfile = loginRepository.getUserProfile()
+                if (userProfile is Resource.Success) {
+                    ownerId = userProfile.data.userId
+                }
+
+                val finalPet = pet.copy(
+                    ownerId = ownerId,
+                    // Placeholder image until Storage is implemented
+                    imageUrl = if(pet.imageUrl.isBlank()) "https://i.imgur.com/8zQ2X9C.png" else pet.imageUrl
+                )
+
+                when (val result = repository.reportPet(finalPet)) {
+                    is Resource.Success -> _uiState.value = ReportPetUiState.Success
+                    is Resource.Error -> _uiState.value = ReportPetUiState.Error(result.message)
+                    else -> {}
+                }
+            } catch (e: Exception) {
+                _uiState.value = ReportPetUiState.Error(e.message ?: "Error desconocido")
             }
         }
     }

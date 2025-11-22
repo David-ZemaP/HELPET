@@ -4,10 +4,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.google.gson.Gson
+import com.ucb.helpet.features.home.domain.model.Pet
 import com.ucb.helpet.features.home.presentation.HomeScreen
+import com.ucb.helpet.features.home.presentation.detail.PetDetailScreen
 import com.ucb.helpet.features.home.presentation.report.ReportPetScreen
 import com.ucb.helpet.features.login.presentation.LoginScreen
 import com.ucb.helpet.features.login.presentation.LoginUiState
@@ -72,6 +77,17 @@ fun AppNavigation() {
 
         composable("report_pet") {
             ReportPetScreen(navController = navController)
+        }
+
+        composable(
+            route = "pet_detail/{petJson}",
+            arguments = listOf(navArgument("petJson") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val petJson = backStackEntry.arguments?.getString("petJson")
+            val pet = Gson().fromJson(petJson, Pet::class.java)
+            if (pet != null) {
+                PetDetailScreen(navController, pet)
+            }
         }
     }
 }
