@@ -22,11 +22,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.ucb.helpet.features.login.domain.model.User
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.foundation.lazy.items // Import this
+import com.ucb.helpet.features.home.domain.model.Pet // Import Pet model
+import com.ucb.helpet.features.home.presentation.PetCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(onLogout: () -> Unit, viewModel: ProfileViewModel = koinViewModel()) {
+fun ProfileScreen(
+    onLogout: () -> Unit,
+    onReportPetClick: () -> Unit,
+    onPetClick: (Pet) -> Unit,
+    viewModel: ProfileViewModel = koinViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
     LaunchedEffect(key1 = Unit) {
         viewModel.logoutEvent.collect {
             onLogout()
@@ -36,48 +47,70 @@ fun ProfileScreen(onLogout: () -> Unit, viewModel: ProfileViewModel = koinViewMo
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* TODO */ },
-                containerColor = Color(0xFF1DE9B6)
+                onClick = onReportPetClick,
+                containerColor = MaterialTheme.colorScheme.secondary
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Nueva Publicación", tint = Color.Black)
+                Icon(Icons.Default.Add, contentDescription = "Nueva Publicación", tint = Color.White)
             }
         }
     ) { paddingValues ->
-        var selectedTabIndex by remember { mutableStateOf(0) }
-        val tabs = listOf("Publicaciones", "Ayudas", "Configuración")
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            item {
-                ProfileHeader()
-                Spacer(modifier = Modifier.height(16.dp))
-                ProfileStats()
-                Spacer(modifier = Modifier.height(16.dp))
-                TabRow(selectedTabIndex = selectedTabIndex) {
-                    tabs.forEachIndexed { index, title ->
-                        Tab(
-                            selected = selectedTabIndex == index,
-                            onClick = { selectedTabIndex = index },
-                            text = { Text(text = title) }
-                        )
-                    }
+        // FIX: Added Loading and Error branches
+        when (val state = uiState) {
+            is ProfileUiState.Loading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
             }
+            is ProfileUiState.Error -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "Error: ${state.message}",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+            is ProfileUiState.Success -> {
+                val user = state.user
+                val pets = state.pets
 
-            when (selectedTabIndex) {
-                0 -> publicationsTab()
-                1 -> ayudasTab()
-                2 -> configuracionTab(viewModel)
+                var selectedTabIndex by remember { mutableIntStateOf(0) }
+                val tabs = listOf("Publicaciones", "Ayudas", "Configuración")
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    item {
+                        ProfileHeader(user)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        ProfileStats(petsCount = pets.size.toString())
+                        Spacer(modifier = Modifier.height(16.dp))
+                        TabRow(selectedTabIndex = selectedTabIndex) {
+                            tabs.forEachIndexed { index, title ->
+                                Tab(
+                                    selected = selectedTabIndex == index,
+                                    onClick = { selectedTabIndex = index },
+                                    text = { Text(text = title) }
+                                )
+                            }
+                        }
+                    }
+
+                    when (selectedTabIndex) {
+                        0 -> publicationsTab(pets, onPetClick)
+                        1 -> ayudasTab()
+                        2 -> configuracionTab(viewModel, user)
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun ProfileHeader() {
+fun ProfileHeader(user: User) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -94,30 +127,36 @@ fun ProfileHeader() {
                         .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "MG", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    val initials = if (user.name.isNotEmpty()) user.name.take(2).uppercase() else "U"
+                    Text(text = initials, color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 }
                 Spacer(modifier = Modifier.size(16.dp))
                 Column {
-                    Text(text = "María González", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Color.White)
-                    Text(text = "Héroe de Mascotas", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.9f))
+                    Text(text = user.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(text = if(user.userType.name == "VETERINARY") "Veterinario" else "Dueño de Mascota", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.9f))
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Amante de los animales y voluntaria en refugios locales. Siempre dispuesta a ayudar a reunir mascotas con sus familias.",
+                text = "Miembro de la comunidad Helpet.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.9f)
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(imageVector = Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
-                Text(text = "Palermo, Buenos Aires", style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 4.dp), color = Color.White.copy(alpha = 0.9f))
+
+            // --- FIX 1: Check for null and access .value ---
+            if (user.location != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(imageVector = Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
+                    Text(
+                        text = user.location.value, // ACCESS .value HERE
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 4.dp),
+                        color = Color.White.copy(alpha = 0.9f)
+                    )
+                }
             }
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(imageVector = Icons.Default.DateRange, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
-                Text(text = "Miembro desde Enero 2024", style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 4.dp), color = Color.White.copy(alpha = 0.9f))
-            }
+
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = { /*TODO*/ },
@@ -132,139 +171,49 @@ fun ProfileHeader() {
 }
 
 @Composable
-fun ProfileStats() {
+fun ProfileStats(petsCount: String = "0") {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceAround
     ) {
-        StatItem(value = "12", label = "Mascotas Ayudadas")
-        StatItem(value = "2,450 HELP", label = "Total Ganado", isHighlighted = true)
-        StatItem(value = "8", label = "Publicaciones", isHighlighted = true, highlightColor = Color(0xFFFFA000))
-        StatItem(value = "4.8", label = "Calificación")
+        StatItem(value = "0", label = "Mascotas Ayudadas")
+        StatItem(value = "0 HELP", label = "Total Ganado", isHighlighted = true)
+        StatItem(
+            value = petsCount, // Use real count
+            label = "Publicaciones",
+            isHighlighted = true,
+            highlightColor = Color(0xFFFFA000)
+        )
     }
 }
 
-@Composable
-fun StatItem(value: String, label: String, isHighlighted: Boolean = false, highlightColor: Color = Color(0xFF00C853)) {
-    Card(shape = RoundedCornerShape(12.dp), modifier = Modifier.padding(4.dp)) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp).width(80.dp)
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = if (isHighlighted) highlightColor else MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = label, style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center)
-        }
-    }
-}
-
-fun LazyListScope.publicationsTab() {
+// Update publicationsTab to render list
+fun LazyListScope.publicationsTab(pets: List<Pet>, onPetClick: (Pet) -> Unit) {
     item {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = "Mis Publicaciones", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Button(onClick = { /*TODO*/ }) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "Nueva")
+        Text("Mis Publicaciones", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleLarge)
+    }
+
+    if (pets.isEmpty()) {
+        item {
+            Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                Text("No tienes publicaciones aún.", color = Color.Gray)
             }
         }
-    }
-    item { PublicationCard("Luna", "Mascota Perdida", "5 días atrás", "234 vistas", "12 respuestas", "Activo") }
-    item { PublicationCard("Desconocido", "Mascota Encontrada", "1 semana atrás", "456 vistas", "8 respuestas", "Resuelto") }
-}
-
-@Composable
-fun PublicationCard(title: String, subtitle: String, date: String, views: String, responses: String, status: String) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            AsyncImage(
-                model = "https://i.imgur.com/8zQ2X9C.png",
-                contentDescription = null,
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(text = subtitle, style = MaterialTheme.typography.bodyMedium)
-                Text(text = date, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                Text(text = "$views - $responses", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-            }
-            Text(
-                text = status,
-                color = if (status == "Activo") Color.White else Color.Gray,
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .background(
-                        color = if (status == "Activo") Color.Red.copy(alpha = 0.8f) else Color.Gray.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            )
+    } else {
+        items(pets) { pet ->
+            PetCard(pet = pet, onDetailClick = onPetClick)
         }
     }
 }
 
 fun LazyListScope.ayudasTab() {
     item {
-        Text(
-            text = "Mascotas que Ayudé a Encontrar",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 8.dp)
-        )
-    }
-    item { HelpedPetCard("Max", "Carlos Ruiz", "500 HELP", "2 semanas atrás • Encontrado") }
-    item { HelpedPetCard("Coco", "Ana López", "300 HELP", "1 mes atrás • Información Útil") }
-}
-
-@Composable
-fun HelpedPetCard(name: String, owner: String, reward: String, details: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(text = "Dueño: $owner", style = MaterialTheme.typography.bodyMedium)
-                Text(text = details, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-            }
-            Column(horizontalAlignment = Alignment.End) {
-                Text(text = reward, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = Color(0xFF00C853))
-                Text(text = "Completado", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-            }
-        }
+        Text("Ayudas", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleLarge)
     }
 }
 
-fun LazyListScope.configuracionTab(viewModel: ProfileViewModel) {
-    item { // Personal Info section
+fun LazyListScope.configuracionTab(viewModel: ProfileViewModel, user: User) {
+    item {
         Text(
             text = "Información Personal",
             style = MaterialTheme.typography.titleMedium,
@@ -273,9 +222,16 @@ fun LazyListScope.configuracionTab(viewModel: ProfileViewModel) {
         )
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
             Column(modifier = Modifier.padding(16.dp)) {
-                InfoRow(icon = Icons.Default.Email, text = "maria.gonzalez@email.com")
-                InfoRow(icon = Icons.Default.Phone, text = "+54 11 1234-5678")
-                InfoRow(icon = Icons.Default.LocationOn, text = "Palermo, Buenos Aires")
+                // Email is now a Value Object, utilize .value or toString()
+                InfoRow(icon = Icons.Default.Email, text = user.email.value)
+
+                // Phone is nullable Value Object
+                val phoneText = user.phone?.value ?: "No registrado"
+                InfoRow(icon = Icons.Default.Phone, text = phoneText)
+
+                // Location is nullable Value Object
+                val locationText = user.location?.value ?: "No registrada"
+                InfoRow(icon = Icons.Default.LocationOn, text = locationText)
             }
         }
     }
@@ -317,6 +273,27 @@ fun InfoRow(icon: ImageVector, text: String) {
 }
 
 @Composable
+fun StatItem(value: String, label: String, isHighlighted: Boolean = false, highlightColor: Color = Color(0xFF00C853)) {
+    // (Same as before)
+    Card(shape = RoundedCornerShape(12.dp), modifier = Modifier.padding(4.dp)) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp).width(80.dp)
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = if (isHighlighted) highlightColor else MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = label, style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center)
+        }
+    }
+}
+
+@Composable
 fun SettingsSwitch(title: String, initialChecked: Boolean, isPublic: Boolean = false) {
     var checked by remember { mutableStateOf(initialChecked) }
     Row(
@@ -333,11 +310,4 @@ fun SettingsSwitch(title: String, initialChecked: Boolean, isPublic: Boolean = f
             Switch(checked = checked, onCheckedChange = { checked = it })
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ProfileScreenPreview() {
-    // Can't preview this directly anymore as it needs a NavController
-    // and a ViewModel. You would need to create a fake ViewModel for the preview.
 }

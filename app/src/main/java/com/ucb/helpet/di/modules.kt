@@ -1,12 +1,21 @@
 package com.ucb.helpet.di
 
+import com.ucb.helpet.features.home.data.datasource.PetRemoteDataSource
+import com.ucb.helpet.features.home.domain.repository.PetRepository
+import com.ucb.helpet.features.home.domain.repository.PetRepositoryImpl
+import com.ucb.helpet.features.home.domain.usecase.GetUserPetsUseCase
+import com.ucb.helpet.features.home.domain.usecase.ReportPetUseCase
+import com.ucb.helpet.features.home.presentation.report.ReportPetViewModel
 import com.ucb.helpet.features.login.data.api.FirebaseService
 import com.ucb.helpet.features.login.data.database.AppDatabase
+import com.ucb.helpet.features.login.data.datasource.LoginDataStore
 import com.ucb.helpet.features.login.data.datasource.LoginRemoteDataSource
 import com.ucb.helpet.features.login.data.repository.LoginRepositoryImpl
+import com.ucb.helpet.features.login.domain.repository.IRepositoryDataStore
 import com.ucb.helpet.features.login.domain.repository.LoginRepository
 import com.ucb.helpet.features.login.domain.usecase.RegisterUserUseCase
 import com.ucb.helpet.features.login.domain.usecases.ForgotPasswordUseCase
+import com.ucb.helpet.features.login.domain.usecases.GetUserProfileUseCase
 import com.ucb.helpet.features.login.domain.usecases.IsUserLoggedInUseCase
 import com.ucb.helpet.features.login.domain.usecases.LoginUseCase
 import com.ucb.helpet.features.login.domain.usecases.LogoutUseCase
@@ -24,27 +33,38 @@ val appModule = module {
     // Firebase
     single { FirebaseService() }
 
-    // Database (Room for local session)
+    // Database
     single { AppDatabase.getDatabase(androidContext()) }
     single { get<AppDatabase>().authTokenDao() }
 
-    // RemoteDataSource
-    single { LoginRemoteDataSource(get()) } // This will now get FirebaseService
+    // DataStore
+    single<IRepositoryDataStore> { LoginDataStore(androidContext()) }
+
+    // DataSources
+    single { LoginRemoteDataSource(get()) }
+    single { PetRemoteDataSource() }
 
     // Repositories
     single<LoginRepository> { LoginRepositoryImpl(get(), get()) }
+    single<PetRepository> { PetRepositoryImpl(get()) }
 
     // UseCases
     factory { RegisterUserUseCase(get()) }
-    factory { ForgotPasswordUseCase(get()) } // Will be refactored later for Firebase
+    factory { ForgotPasswordUseCase(get()) }
     factory { LoginUseCase(get()) }
     factory { IsUserLoggedInUseCase(get()) }
     factory { LogoutUseCase(get()) }
+    factory { GetUserProfileUseCase(get()) }
+    factory { ReportPetUseCase(get(), get()) }
+    factory { GetUserPetsUseCase(get()) }
 
     // ViewModels
     viewModel { LoginViewModel(get(), get()) }
     viewModel { RegisterViewModel(get()) }
-    viewModel { ForgotPasswordViewModel(get()) } // Will be refactored later for Firebase
+    viewModel { ForgotPasswordViewModel(get()) }
     viewModel { SplashViewModel(get()) }
-    viewModel { ProfileViewModel(get()) }
+    viewModel { ProfileViewModel(get(), get(), get()) }
+
+    // FIX: Inject LoginRepository (the second 'get()') to fetch User ID
+    viewModel { ReportPetViewModel(get(), get()) }
 }
