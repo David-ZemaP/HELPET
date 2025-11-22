@@ -125,7 +125,6 @@ fun ProfileHeader(user: User) {
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            // You could add a bio field to User model later
             Text(
                 text = "Miembro de la comunidad Helpet.",
                 style = MaterialTheme.typography.bodyMedium,
@@ -133,11 +132,16 @@ fun ProfileHeader(user: User) {
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            // DISPLAY REAL LOCATION
-            if (user.location.isNotEmpty()) {
+            // --- FIX 1: Check for null and access .value ---
+            if (user.location != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(imageVector = Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
-                    Text(text = user.location, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 4.dp), color = Color.White.copy(alpha = 0.9f))
+                    Text(
+                        text = user.location.value, // ACCESS .value HERE
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 4.dp),
+                        color = Color.White.copy(alpha = 0.9f)
+                    )
                 }
             }
 
@@ -181,7 +185,7 @@ fun LazyListScope.ayudasTab() {
 }
 
 fun LazyListScope.configuracionTab(viewModel: ProfileViewModel, user: User) {
-    item { // Personal Info section
+    item {
         Text(
             text = "Información Personal",
             style = MaterialTheme.typography.titleMedium,
@@ -190,21 +194,16 @@ fun LazyListScope.configuracionTab(viewModel: ProfileViewModel, user: User) {
         )
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
             Column(modifier = Modifier.padding(16.dp)) {
-                InfoRow(icon = Icons.Default.Email, text = user.email)
+                // Email is now a Value Object, utilize .value or toString()
+                InfoRow(icon = Icons.Default.Email, text = user.email.value)
 
-                // DISPLAY REAL PHONE
-                if (user.phone.isNotEmpty()) {
-                    InfoRow(icon = Icons.Default.Phone, text = user.phone)
-                } else {
-                    InfoRow(icon = Icons.Default.Phone, text = "No registrado")
-                }
+                // Phone is nullable Value Object
+                val phoneText = user.phone?.value ?: "No registrado"
+                InfoRow(icon = Icons.Default.Phone, text = phoneText)
 
-                // DISPLAY REAL LOCATION
-                if (user.location.isNotEmpty()) {
-                    InfoRow(icon = Icons.Default.LocationOn, text = user.location)
-                } else {
-                    InfoRow(icon = Icons.Default.LocationOn, text = "No registrada")
-                }
+                // Location is nullable Value Object
+                val locationText = user.location?.value ?: "No registrada"
+                InfoRow(icon = Icons.Default.LocationOn, text = locationText)
             }
         }
     }
