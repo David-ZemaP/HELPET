@@ -14,21 +14,22 @@ class RegisterViewModel(private val registerUserUseCase: RegisterUserUseCase) : 
     private val _uiState = MutableStateFlow<RegisterUiState>(RegisterUiState.Idle)
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
 
-    fun register(name: String, email: String, password: String, userType: UserType) {
+    // Updated to accept phone and location
+    fun register(name: String, email: String, password: String, userType: UserType, phone: String, location: String) {
         viewModelScope.launch {
             _uiState.value = RegisterUiState.Loading
 
-            // Basic client-side validation
             if (name.isBlank() || email.isBlank() || password.isBlank()) {
                 _uiState.value = RegisterUiState.Error("Por favor completa todos los campos obligatorios.")
                 return@launch
             }
             if (password.length < 8) {
-                 _uiState.value = RegisterUiState.Error("La contraseña debe tener al menos 8 caracteres.")
+                _uiState.value = RegisterUiState.Error("La contraseña debe tener al menos 8 caracteres.")
                 return@launch
             }
 
-            when (val result = registerUserUseCase(name, email, password, userType)) {
+            // Pass phone and location
+            when (val result = registerUserUseCase(name, email, password, userType, phone, location)) {
                 is Resource.Success -> {
                     _uiState.value = RegisterUiState.Success
                 }

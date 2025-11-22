@@ -12,6 +12,7 @@ import com.ucb.helpet.features.login.data.repository.LoginRepositoryImpl
 import com.ucb.helpet.features.login.domain.repository.LoginRepository
 import com.ucb.helpet.features.login.domain.usecase.RegisterUserUseCase
 import com.ucb.helpet.features.login.domain.usecases.ForgotPasswordUseCase
+import com.ucb.helpet.features.login.domain.usecases.GetUserProfileUseCase
 import com.ucb.helpet.features.login.domain.usecases.IsUserLoggedInUseCase
 import com.ucb.helpet.features.login.domain.usecases.LoginUseCase
 import com.ucb.helpet.features.login.domain.usecases.LogoutUseCase
@@ -49,12 +50,13 @@ val appModule = module {
     factory { IsUserLoggedInUseCase(get()) }
     factory { LogoutUseCase(get()) }
     factory { ReportPetUseCase(get(), get()) }
+    factory { GetUserProfileUseCase(get()) }
 
     // ViewModels
     viewModel { LoginViewModel(get(), get()) }
     viewModel { RegisterViewModel(get()) }
     viewModel { ForgotPasswordViewModel(get()) } // Will be refactored later for Firebase
     viewModel { SplashViewModel(get()) }
-    viewModel { ProfileViewModel(get()) }
+    viewModel { ProfileViewModel(get(), get()) }
     viewModel { ReportPetViewModel(get()) }
 }

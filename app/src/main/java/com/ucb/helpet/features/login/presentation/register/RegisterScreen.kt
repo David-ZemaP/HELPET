@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.material3.MenuAnchorType // Make sure this is imported
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,17 +77,17 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Fondo DarkBackground del tema
-            .imePadding() // IMPORTANTE: Permite que la pantalla se ajuste al abrir el teclado
+            .background(MaterialTheme.colorScheme.background)
+            .padding(bottom = 16.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp) // Padding horizontal general
-                .verticalScroll(rememberScrollState()), // HABILITA EL SCROLL
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(48.dp)) // Espacio superior
+            Spacer(modifier = Modifier.height(48.dp))
 
             // ICONO CABECERA
             Box(
@@ -98,7 +99,7 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                 Icon(
                     imageVector = Icons.Outlined.FavoriteBorder,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer, // Violeta
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -109,14 +110,14 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
             Text(
                 text = "Únete a Helpet",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground, // Blanco
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Crea tu cuenta y empieza a ayudar",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant, // Gris
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
 
@@ -125,7 +126,7 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
             // TARJETA DEL FORMULARIO
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), // Fondo Tarjeta
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
             ) {
@@ -159,7 +160,8 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .menuAnchor(),
+                                // FIX: Use PrimaryNotEditable instead of Primary
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true),
                             shape = RoundedCornerShape(12.dp),
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -339,7 +341,7 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                     Button(
                         onClick = {
                             if (password == confirmPassword) {
-                                viewModel.register(name, email, password, userType)
+                                viewModel.register(name, email, password, userType, phone, location)
                             } else {
                                 Toast.makeText(context, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
                             }

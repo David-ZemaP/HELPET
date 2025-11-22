@@ -12,7 +12,7 @@ class LoginRemoteDataSource(private val firebaseService: FirebaseService) {
     // IMPORTANT: Reference the Realtime Database instance from FirebaseService
     private val usersRef = FirebaseDatabase.getInstance().getReference("users")
 
-    suspend fun register(name: String, email: String, password: String, userType: UserType) {
+    suspend fun register(name: String, email: String, password: String, userType: UserType, phone: String, location: String) {
         try {
             // 1. Authenticate and create user using Firebase Auth
             val authResult = firebaseService.auth.createUserWithEmailAndPassword(email, password).await()
@@ -23,6 +23,8 @@ class LoginRemoteDataSource(private val firebaseService: FirebaseService) {
                 userId = firebaseUser.uid,
                 name = name,
                 email = email,
+                phone = phone,          // Save phone
+                location = location,
                 password = "", // Empty password here since Firebase Auth handles it securely
                 userType = userType
             )
@@ -73,5 +75,19 @@ class LoginRemoteDataSource(private val firebaseService: FirebaseService) {
     }
     fun logout() {
         firebaseService.auth.signOut()
+    }
+
+    suspend fun getUser(userId: String): User {
+        return try {
+            val snapshot = usersRef.child(userId).get().await()
+            // Convert the snapshot to a User object
+            snapshot.getValue(User::class.java) ?: throw Exception("Usuario no encontrado")
+        } catch (e: Exception) {
+            throw Exception(e.message ?: "Error al obtener datos del usuario")
+        }
+    }
+
+    fun getCurrentUserId(): String? {
+        return firebaseService.auth.currentUser?.uid
     }
 }
