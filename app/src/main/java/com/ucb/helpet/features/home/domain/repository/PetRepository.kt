@@ -3,11 +3,14 @@ package com.ucb.helpet.features.home.domain.repository
 import com.ucb.helpet.features.home.data.datasource.PetRemoteDataSource
 import com.ucb.helpet.features.home.domain.model.Pet
 import com.ucb.helpet.utils.Resource
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 
 interface PetRepository {
     suspend fun reportPet(pet: Pet): Resource<Unit>
-    // NEW
-    suspend fun getPetsByOwner(ownerId: String): Resource<List<Pet>>
+    fun getPetsByOwner(ownerId: String): Flow<Resource<List<Pet>>>
+    fun getAllPets(): Flow<Resource<List<Pet>>>
 }
 
 class PetRepositoryImpl(
@@ -23,13 +26,15 @@ class PetRepositoryImpl(
         }
     }
 
-    // NEW IMPLEMENTATION
-    override suspend fun getPetsByOwner(ownerId: String): Resource<List<Pet>> {
-        return try {
-            val pets = remoteDataSource.getPetsByOwner(ownerId)
-            Resource.Success(pets)
-        } catch (e: Exception) {
-            Resource.Error(e.message ?: "Error al obtener mascotas")
-        }
+    override fun getPetsByOwner(ownerId: String): Flow<Resource<List<Pet>>> {
+        return remoteDataSource.getPetsByOwner(ownerId)
+            .map<List<Pet>, Resource<List<Pet>>> { Resource.Success(it) }
+            .catch { e -> emit(Resource.Error(e.message ?: "Error al obtener mascotas")) }
+    }
+
+    override fun getAllPets(): Flow<Resource<List<Pet>>> {
+        return remoteDataSource.getAllPets()
+            .map<List<Pet>, Resource<List<Pet>>> { Resource.Success(it) }
+            .catch { e -> emit(Resource.Error(e.message ?: "Error al obtener todas las mascotas")) }
     }
 }

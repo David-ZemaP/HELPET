@@ -3,8 +3,10 @@ package com.ucb.helpet.di
 import com.ucb.helpet.features.home.data.datasource.PetRemoteDataSource
 import com.ucb.helpet.features.home.domain.repository.PetRepository
 import com.ucb.helpet.features.home.domain.repository.PetRepositoryImpl
+import com.ucb.helpet.features.home.domain.usecase.GetAllPetsUseCase
 import com.ucb.helpet.features.home.domain.usecase.GetUserPetsUseCase
 import com.ucb.helpet.features.home.domain.usecase.ReportPetUseCase
+import com.ucb.helpet.features.home.presentation.HomeViewModel
 import com.ucb.helpet.features.home.presentation.report.ReportPetViewModel
 import com.ucb.helpet.features.login.data.api.FirebaseService
 import com.ucb.helpet.features.login.data.database.AppDatabase
@@ -24,7 +26,9 @@ import com.ucb.helpet.features.login.presentation.forgotpassword.ForgotPasswordV
 import com.ucb.helpet.features.login.presentation.register.RegisterViewModel
 import com.ucb.helpet.features.profile.presentation.ProfileViewModel
 import com.ucb.helpet.features.splash.presentation.SplashViewModel
+import com.ucb.helpet.features.search.presentation.SearchViewModel
 import org.koin.android.ext.koin.androidContext
+
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -57,6 +61,7 @@ val appModule = module {
     factory { GetUserProfileUseCase(get()) }
     factory { ReportPetUseCase(get(), get()) }
     factory { GetUserPetsUseCase(get()) }
+    factory { GetAllPetsUseCase(get()) }
 
     // ViewModels
     viewModel { LoginViewModel(get(), get()) }
@@ -64,6 +69,8 @@ val appModule = module {
     viewModel { ForgotPasswordViewModel(get()) }
     viewModel { SplashViewModel(get()) }
     viewModel { ProfileViewModel(get(), get(), get()) }
+    viewModel { SearchViewModel(get()) }
+    viewModel { HomeViewModel(get()) }
 
     // FIX: Inject LoginRepository (the second 'get()') to fetch User ID
     viewModel { ReportPetViewModel(get(), get()) }

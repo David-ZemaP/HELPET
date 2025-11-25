@@ -1,3 +1,4 @@
+
 package com.ucb.helpet.features.home.presentation
 
 import android.net.Uri
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
@@ -33,7 +35,9 @@ import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,6 +48,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -59,12 +64,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import coil3.compose.AsyncImage
 import com.google.gson.Gson
 import com.ucb.helpet.features.home.domain.model.Pet
 import com.ucb.helpet.features.profile.presentation.ProfileScreen
+import com.ucb.helpet.features.search.presentation.SearchScreen
+import org.koin.androidx.compose.koinViewModel
 
 sealed class BottomNavItem(
     val title: String,
@@ -100,7 +108,7 @@ sealed class BottomNavItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = koinViewModel()) {
 
     val items = listOf(
         BottomNavItem.Home,
@@ -146,12 +154,21 @@ fun HomeScreen(navController: NavController) {
                     )
                 }
             }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navController.navigate("report_pet") },
+                shape = CircleShape,
+                containerColor = Color(0xFF34D399)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.Black)
+            }
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedItemIndex) {
-                0 -> HomeContent(navController)
-                1 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Search.title) }
+                0 -> HomeContent(navController = navController, homeViewModel = homeViewModel)
+                1 -> SearchScreen(navController = navController, viewModel = koinViewModel())
                 2 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Rewards.title) }
                 3 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Donations.title) }
                 4 -> ProfileScreen(
@@ -174,7 +191,9 @@ fun HomeScreen(navController: NavController) {
 }
 
 @Composable
-fun HomeContent(navController: NavController) { // CORRECCIÓN 2: Recibimos navController como parámetro
+fun HomeContent(navController: NavController, homeViewModel: HomeViewModel) {
+    val uiState by homeViewModel.uiState.collectAsState()
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -189,109 +208,165 @@ fun HomeContent(navController: NavController) { // CORRECCIÓN 2: Recibimos navC
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
-            Spacer(modifier = Modifier.height(32.dp))
-            Icon(
-                imageVector = Icons.Default.FavoriteBorder,
-                contentDescription = null,
-                modifier = Modifier.size(64.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary).padding(16.dp),
-                tint = Color.White
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Reúne a las mascotas con sus familias",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Conecta con una comunidad que se preocupa...",
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 32.dp)
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            Button(
-                onClick = { /*TODO*/ },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                    Text(text = "Buscar Mascotas", modifier = Modifier.padding(start = 8.dp))
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = "Heart Icon",
+                    modifier = Modifier.size(56.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Reúne a las mascotas con sus familias",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Conecta con una comunidad que se preocupa. Encuentra mascotas perdidas y ayuda a otros con recompensas justas.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = { /* TODO */ },
+                    modifier = Modifier.fillMaxWidth(0.8f)
+                ) {
+                    Icon(imageVector = Icons.Default.Search, contentDescription = "Search Icon")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Buscar Mascotas")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = { /* TODO */ },
+                    modifier = Modifier.fillMaxWidth(0.8f)
+                ) {
+                    Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Report Icon")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Reportar Perdido")
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedButton(
-                onClick = { navController.navigate("report_pet") },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = null)
-                    Text(text = "Reportar Perdida", modifier = Modifier.padding(start = 8.dp))
-                }
-            }
-            Spacer(modifier = Modifier.height(32.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                StatCard("1,247", "Mascotas Reunidas")
-                StatCard("45.6", "ETH en Recompensas")
-                StatCard("892", "Usuarios Activos")
-            }
-            Spacer(modifier = Modifier.height(32.dp))
-            Text(
-                text = "Mascotas Reportadas Recientemente",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // Mock Data for Home
-        val pets = listOf(
-            Pet(name = "Luna", type = "Perro", location = "Palermo", status = "Perdido", imageUrl = "https://i.imgur.com/8zQ2X9C.png"),
-            Pet(name = "Michi", type = "Gato", location = "Recoleta", status = "Encontrado", imageUrl = "https://i.imgur.com/8zQ2X9C.png")
-        )
-
-        items(pets) { pet ->
-            // Pass navigation action here too
-            PetCard(
-                pet = pet,
-                onDetailClick = { selectedPet ->
-                    val petJson = Uri.encode(Gson().toJson(selectedPet))
-                    navController.navigate("pet_detail/$petJson")
-                }
-            )
         }
 
         item {
-            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                StatCard(modifier = Modifier.weight(1f), value = "1,247", label = "Mascotas Reunidas")
+                StatCard(modifier = Modifier.weight(1f), value = "45.6", label = "ETH en Recompensas")
+                StatCard(modifier = Modifier.weight(1f), value = "892", label = "Usuarios Activos")
+            }
+        }
+
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Mascotas Reportadas Recientemente",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Ayuda a reunirlas con sus familias",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+
+        when (val state = uiState) {
+            is HomeUiState.Loading -> {
+                item { CircularProgressIndicator(modifier = Modifier.padding(16.dp)) }
+            }
+            is HomeUiState.Success -> {
+                items(state.pets) { pet ->
+                    PetCard(
+                        pet = pet,
+                        onDetailClick = { selectedPet ->
+                            val petJson = Uri.encode(Gson().toJson(selectedPet))
+                            navController.navigate("pet_detail/$petJson")
+                        }
+                    )
+                }
+            }
+            is HomeUiState.Error -> {
+                item { Text(text = state.message, color = Color.Red, modifier = Modifier.padding(16.dp)) }
+            }
+        }
+
+        item {
             OutlinedButton(
-                onClick = { /* TODO */ },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
+                onClick = { /* TODO: Navigate to all pets screen */ },
+                modifier = Modifier.padding(top = 16.dp)
             ) {
                 Text(text = "Ver Todas las Mascotas")
             }
-            Spacer(modifier = Modifier.height(32.dp))
-            Text(
-                text = "¿Cómo Funciona?",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            HowItWorksStep(icon = { Icon(Icons.Default.Search, null) }, title = "Reporta", description = "Reporta tu mascota perdida...")
-            HowItWorksStep(icon = { Icon(Icons.Default.FavoriteBorder, null) }, title = "Conecta", description = "Nuestra comunidad ayuda...")
-            HowItWorksStep(icon = { Icon(Icons.Default.FavoriteBorder, null) }, title = "Recompensa", description = "Recibe recompensas...")
-            Spacer(modifier = Modifier.height(32.dp))
+        }
+
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 32.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "¿Cómo Funciona?",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Tres simples pasos para reunir mascotas con sus familias",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                HowItWorksStep(
+                    icon = { Icon(Icons.Default.Search, "Report") },
+                    title = "Reporta",
+                    description = "Reporta tu mascota perdida o una que hayas encontrado con fotos y detalles."
+                )
+                HowItWorksStep(
+                    icon = { Icon(Icons.Default.Person, "Connect") },
+                    title = "Conecta",
+                    description = "Nuestra comunidad ayuda a encontrar coincidencias y conectar dueños."
+                )
+                HowItWorksStep(
+                    icon = { Icon(Icons.Default.Star, "Reward") },
+                    title = "Recompensa",
+                    description = "Recibe recompensas en tokens HELP por ayudar a reunir mascotas."
+                )
+            }
+        }
+
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("100% Seguro", modifier = Modifier.padding(4.dp))
+                Text("Comunidad Verificada", modifier = Modifier.padding(4.dp))
+                Text("Recompensas Justas", modifier = Modifier.padding(4.dp))
+            }
         }
     }
 }
 
-// ... Resto del código (HowItWorksStep, StatCard, PetCard) se mantiene igual ...
+
 @Composable
 fun HowItWorksStep(icon: @Composable () -> Unit, title: String, description: String) {
     Row(
@@ -318,20 +393,24 @@ fun HowItWorksStep(icon: @Composable () -> Unit, title: String, description: Str
 }
 
 @Composable
-fun StatCard(value: String, label: String) {
+fun StatCard(modifier: Modifier = Modifier, value: String, label: String) {
     Card(
-        modifier = Modifier.padding(8.dp),
+        modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = value,
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
             )
             Text(
                 text = label,
@@ -358,7 +437,9 @@ fun PetCard(pet: Pet, onDetailClick: (Pet) -> Unit) {
             AsyncImage(
                 model = pet.imageUrl,
                 contentDescription = pet.name,
-                modifier = Modifier.size(80.dp).clip(RoundedCornerShape(16.dp)),
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(16.dp)),
                 contentScale = ContentScale.Crop
             )
 
