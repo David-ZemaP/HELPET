@@ -13,11 +13,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 sealed class ProfileUiState {
     object Loading : ProfileUiState()
-    // Update Success to include list of pets
     data class Success(val user: User, val pets: List<Pet> = emptyList()) : ProfileUiState()
     data class Error(val message: String) : ProfileUiState()
 }
@@ -25,7 +26,7 @@ sealed class ProfileUiState {
 class ProfileViewModel(
     private val logoutUseCase: LogoutUseCase,
     private val getUserProfileUseCase: GetUserProfileUseCase,
-    private val getUserPetsUseCase: GetUserPetsUseCase // Inject new use case
+    private val getUserPetsUseCase: GetUserPetsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
@@ -35,28 +36,48 @@ class ProfileViewModel(
     val logoutEvent = _logoutEvent.asSharedFlow()
 
     init {
-        fetchUserProfile()
+        fetchUserProfileAndPets()
     }
 
-    private fun fetchUserProfile() {
+    private fun fetchUserProfileAndPets() {
         viewModelScope.launch {
             _uiState.value = ProfileUiState.Loading
 
-            // 1. Fetch User
+            // 1. Fetch User Profile
             when (val userResult = getUserProfileUseCase()) {
                 is Resource.Success -> {
                     val user = userResult.data
+                    // Set initial success state with user info but empty pet list
+                    _uiState.value = ProfileUiState.Success(user)
 
-                    // 2. Fetch User's Pets using the userId
-                    val petsResult = getUserPetsUseCase(user.userId)
-                    val pets = if (petsResult is Resource.Success) petsResult.data else emptyList()
-
-                    _uiState.value = ProfileUiState.Success(user, pets)
+                    // 2. Start collecting the pet stream using the user's ID
+                    getUserPetsUseCase(user.userId).onEach { petsResult ->
+                        when (petsResult) {
+                            is Resource.Success -> {
+                                // When new pet data arrives, update the state
+                                val currentState = _uiState.value
+                                if (currentState is ProfileUiState.Success) {
+                                    _uiState.value = currentState.copy(pets = petsResult.data ?: emptyList())
+                                }
+                            }
+                            is Resource.Error -> {
+                                // You might want to show a non-fatal error for the pet list
+                                val currentState = _uiState.value
+                                if (currentState is ProfileUiState.Success) {
+                                     // Optionally, you can show a message or just log it
+                                }
+                            }
+                            // Handle other states if necessary
+                            else -> {}
+                        }
+                    }.launchIn(viewModelScope)
                 }
                 is Resource.Error -> {
                     _uiState.value = ProfileUiState.Error(userResult.message)
                 }
-                else -> {}
+                else -> {
+                    // Handle loading/initial for user profile if needed
+                }
             }
         }
     }

@@ -1,8 +1,10 @@
 package com.ucb.helpet.features.splash.presentation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,6 +28,8 @@ fun SplashScreen(
                     popUpTo("splash") { inclusive = true }
                 }
             }
+
+
             is SplashState.UserNotLoggedIn -> {
                 navController.navigate("login") {
                     popUpTo("splash") { inclusive = true }
@@ -35,7 +39,12 @@ fun SplashScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        contentAlignment = Alignment.Center
+    ) {
         CircularProgressIndicator()
     }
 }
