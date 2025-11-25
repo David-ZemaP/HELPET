@@ -26,4 +26,13 @@ class PetRemoteDataSource {
             emptyList()
         }
     }
+
+    suspend fun getPetById(petId: String): Pet {
+        return try {
+            val snapshot = petsRef.child(petId).get().await()
+            snapshot.getValue(Pet::class.java) ?: throw Exception("Mascota no encontrada")
+        } catch (e: Exception) {
+            throw Exception("Error al cargar mascota: ${e.message}")
+        }
+    }
 }

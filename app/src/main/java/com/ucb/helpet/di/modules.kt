@@ -3,8 +3,10 @@ package com.ucb.helpet.di
 import com.ucb.helpet.features.home.data.datasource.PetRemoteDataSource
 import com.ucb.helpet.features.home.domain.repository.PetRepository
 import com.ucb.helpet.features.home.domain.repository.PetRepositoryImpl
+import com.ucb.helpet.features.home.domain.usecase.GetPetByIdUseCase
 import com.ucb.helpet.features.home.domain.usecase.GetUserPetsUseCase
 import com.ucb.helpet.features.home.domain.usecase.ReportPetUseCase
+import com.ucb.helpet.features.home.presentation.detail.PetDetailViewModel
 import com.ucb.helpet.features.home.presentation.report.ReportPetViewModel
 import com.ucb.helpet.features.login.data.api.FirebaseService
 import com.ucb.helpet.features.login.data.database.AppDatabase
@@ -57,6 +59,7 @@ val appModule = module {
     factory { GetUserProfileUseCase(get()) }
     factory { ReportPetUseCase(get(), get()) }
     factory { GetUserPetsUseCase(get()) }
+    factory { GetPetByIdUseCase(get()) }
 
     // ViewModels
     viewModel { LoginViewModel(get(), get()) }
@@ -67,4 +70,5 @@ val appModule = module {
 
     // FIX: Inject LoginRepository (the second 'get()') to fetch User ID
     viewModel { ReportPetViewModel(get(), get()) }
+    viewModel { PetDetailViewModel(get()) }
 }

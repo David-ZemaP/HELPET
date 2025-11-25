@@ -8,6 +8,8 @@ interface PetRepository {
     suspend fun reportPet(pet: Pet): Resource<Unit>
     // NEW
     suspend fun getPetsByOwner(ownerId: String): Resource<List<Pet>>
+
+    suspend fun getPetById(petId: String): Resource<Pet>
 }
 
 class PetRepositoryImpl(
@@ -30,6 +32,15 @@ class PetRepositoryImpl(
             Resource.Success(pets)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Error al obtener mascotas")
+        }
+    }
+
+    override suspend fun getPetById(petId: String): Resource<Pet> {
+        return try {
+            val pet = remoteDataSource.getPetById(petId)
+            Resource.Success(pet)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Error desconocido")
         }
     }
 }

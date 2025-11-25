@@ -17,6 +17,14 @@
         android:theme="@style/Theme.HELPET"
         tools:targetApi="36">
 
+        <service
+            android:name=".features.notifications.HelpetMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
