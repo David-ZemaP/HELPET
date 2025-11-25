@@ -28,6 +28,8 @@ fun SplashScreen(
                     popUpTo("splash") { inclusive = true }
                 }
             }
+
+
             is SplashState.UserNotLoggedIn -> {
                 navController.navigate("login") {
                     popUpTo("splash") { inclusive = true }
