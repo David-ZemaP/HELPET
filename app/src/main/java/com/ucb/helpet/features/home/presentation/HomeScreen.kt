@@ -120,23 +120,6 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = koin
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Helpet") },
-                actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color.Gray),
-                            imageVector = Icons.Default.FavoriteBorder, // Placeholder
-                            contentDescription = "Profile"
-                        )
-                    }
-                }
-            )
-        },
         bottomBar = {
             NavigationBar {
                 items.forEachIndexed { index, item ->
