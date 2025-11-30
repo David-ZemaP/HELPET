@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
@@ -39,14 +38,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -62,7 +59,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -94,11 +90,6 @@ sealed class BottomNavItem(
         selectedIcon = Icons.Filled.Star,
         unselectedIcon = Icons.Outlined.StarBorder,
     )
-    object Donations : BottomNavItem(
-        title = "Donaciones",
-        selectedIcon = Icons.Filled.Favorite,
-        unselectedIcon = Icons.Outlined.FavoriteBorder,
-    )
     object Profile : BottomNavItem(
         title = "Perfil",
         selectedIcon = Icons.Filled.Person,
@@ -114,7 +105,6 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = koin
         BottomNavItem.Home,
         BottomNavItem.Search,
         BottomNavItem.Rewards,
-        BottomNavItem.Donations,
         BottomNavItem.Profile
     )
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
@@ -153,8 +143,7 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = koin
                 0 -> HomeContent(navController = navController, homeViewModel = homeViewModel)
                 1 -> SearchScreen(navController = navController, viewModel = koinViewModel())
                 2 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Rewards.title) }
-                3 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Donations.title) }
-                4 -> ProfileScreen(
+                3 -> ProfileScreen(
                     onLogout = {
                         navController.navigate("login") {
                             popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
@@ -163,7 +152,6 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = koin
                     },
                     onReportPetClick = { navController.navigate("report_pet") },
                     onPetClick = { pet ->
-                        // Navigate to detail
                         val petJson = Uri.encode(Gson().toJson(pet))
                         navController.navigate("pet_detail/$petJson")
                     }
@@ -457,7 +445,6 @@ fun PetCard(pet: Pet, onDetailClick: (Pet) -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Call the callback here
                 OutlinedButton(onClick = { onDetailClick(pet) }) {
                     Text(text = "Ver Detalles")
                 }
