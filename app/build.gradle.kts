@@ -46,6 +46,14 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.8"
     }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/LICENSE-notice.md"
+        }
+    }
 }
 
 dependencies {
@@ -95,7 +103,9 @@ dependencies {
     implementation(libs.datastore)
 
     testImplementation(libs.mockk)
+    androidTestImplementation(libs.mockk.android)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
     implementation(libs.androidx.material.icons.extended.android)
 
     implementation(platform(libs.firebase.bom))
