@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.map
 
 interface PetRepository {
     suspend fun reportPet(pet: Pet): Resource<Unit>
+    // NEW
+    suspend fun getPetsByOwner(ownerId: String): Resource<List<Pet>>
+
+    suspend fun getPetById(petId: String): Resource<Pet>
     fun getPetsByOwner(ownerId: String): Flow<Resource<List<Pet>>>
     fun getAllPets(): Flow<Resource<List<Pet>>>
 }
@@ -36,5 +40,14 @@ class PetRepositoryImpl(
         return remoteDataSource.getAllPets()
             .map<List<Pet>, Resource<List<Pet>>> { Resource.Success(it) }
             .catch { e -> emit(Resource.Error(e.message ?: "Error al obtener todas las mascotas")) }
+    }
+
+    override suspend fun getPetById(petId: String): Resource<Pet> {
+        return try {
+            val pet = remoteDataSource.getPetById(petId)
+            Resource.Success(pet)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Error desconocido")
+        }
     }
 }
