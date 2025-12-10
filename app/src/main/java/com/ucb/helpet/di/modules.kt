@@ -24,6 +24,7 @@ import com.ucb.helpet.features.login.domain.usecases.LogoutUseCase
 import com.ucb.helpet.features.login.presentation.LoginViewModel
 import com.ucb.helpet.features.login.presentation.forgotpassword.ForgotPasswordViewModel
 import com.ucb.helpet.features.login.presentation.register.RegisterViewModel
+import com.ucb.helpet.features.notifications.NotificationHelper
 import com.ucb.helpet.features.profile.presentation.ProfileViewModel
 import com.ucb.helpet.features.splash.presentation.SplashViewModel
 import org.koin.android.ext.koin.androidContext
@@ -45,6 +46,9 @@ val appModule = module {
     // DataSources
     single { LoginRemoteDataSource(get()) }
     single { PetRemoteDataSource() }
+
+    // Helpers
+    single { NotificationHelper(androidContext()) }
 
     // Repositories
     single<LoginRepository> { LoginRepositoryImpl(get(), get()) }
@@ -69,6 +73,6 @@ val appModule = module {
     viewModel { ProfileViewModel(get(), get(), get()) }
 
     // FIX: Inject LoginRepository (the second 'get()') to fetch User ID
-    viewModel { ReportPetViewModel(get(), get()) }
+    viewModel { ReportPetViewModel(get(), get(), get()) }
     viewModel { PetDetailViewModel(get()) }
 }

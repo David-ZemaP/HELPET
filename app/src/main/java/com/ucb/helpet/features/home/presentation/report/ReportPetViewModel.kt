@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.ucb.helpet.features.home.domain.model.Pet
 import com.ucb.helpet.features.home.domain.repository.PetRepository
 import com.ucb.helpet.features.login.domain.repository.LoginRepository
+import com.ucb.helpet.features.notifications.NotificationHelper
 import com.ucb.helpet.utils.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +20,8 @@ sealed class ReportPetUiState {
 
 class ReportPetViewModel(
     private val repository: PetRepository,
-    private val loginRepository: LoginRepository // Changed from IRepositoryDataStore
+    private val loginRepository: LoginRepository, // Changed from IRepositoryDataStore
+    private val notificationHelper: NotificationHelper
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ReportPetUiState>(ReportPetUiState.Idle)
@@ -49,7 +51,10 @@ class ReportPetViewModel(
                 )
 
                 when (val result = repository.reportPet(finalPet)) {
-                    is Resource.Success -> _uiState.value = ReportPetUiState.Success
+                    is Resource.Success -> {
+                        _uiState.value = ReportPetUiState.Success
+                        notificationHelper.showPetPublishedNotification(finalPet.name)
+                    }
                     is Resource.Error -> _uiState.value = ReportPetUiState.Error(result.message)
                     else -> {}
                 }
