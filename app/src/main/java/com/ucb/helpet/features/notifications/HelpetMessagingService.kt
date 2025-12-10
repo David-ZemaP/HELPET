@@ -22,6 +22,10 @@ class HelpetMessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        // Log para verificar si el mensaje se recibe
+        Log.d("FCM_MESSAGE", "FROM: ${remoteMessage.from}")
+        Log.d("FCM_MESSAGE", "DATA: ${remoteMessage.data}")
+
         super.onMessageReceived(remoteMessage)
 
         val data = remoteMessage.data
