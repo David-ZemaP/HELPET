@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "212025412109",
+    "firebase_url": "https://helpet-da46f-default-rtdb.firebaseio.com",
     "project_id": "helpet-da46f",
     "storage_bucket": "helpet-da46f.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.ucb.helpet"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "212025412109-49ppijonq40u1sqa3fm2u71h8lh9l9aa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ucb.helpet",
+            "certificate_hash": "586e1b9fc24314a54887979387d8f06d23bd1ae9"
+          }
+        },
+        {
+          "client_id": "212025412109-ekklhji3tl5t70qob4mncqcsm95dh348.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBSeM2Oo_ZdMPIkoOweEmQchAT0XSUGvm0"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "212025412109-ekklhji3tl5t70qob4mncqcsm95dh348.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

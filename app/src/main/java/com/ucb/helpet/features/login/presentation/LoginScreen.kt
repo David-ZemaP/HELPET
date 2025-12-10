@@ -1,6 +1,10 @@
 package com.ucb.helpet.features.login.presentation
 
+import android.app.Activity
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,6 +45,15 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = {
+            if (it.resultCode == Activity.RESULT_OK) {
+                it.data?.let { intent -> viewModel.signInWithIntent(intent) }
+            }
+        }
+    )
 
     // Usamos el fondo del tema (DarkBackground)
     Box(
@@ -208,7 +221,7 @@ fun LoginScreen(
 
                     // Botón Google
                     OutlinedButton(
-                        onClick = { /* TODO */ },
+                        onClick = { viewModel.onGoogleSignInClicked() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
@@ -253,8 +266,18 @@ fun LoginScreen(
     }
 
     LaunchedEffect(uiState) {
-        if (uiState is LoginUiState.Success) {
-            Toast.makeText(context, "¡Bienvenido!", Toast.LENGTH_SHORT).show()
+        when (val result = uiState) {
+            is LoginUiState.Success -> {
+                Toast.makeText(context, "¡Bienvenido!", Toast.LENGTH_SHORT).show()
+            }
+            is LoginUiState.LaunchGoogleSignIn -> {
+                result.intentSender?.let {
+                    launcher.launch(
+                        IntentSenderRequest.Builder(it).build()
+                    )
+                }
+            }
+            else -> {}
         }
     }
 }
