@@ -1,3 +1,4 @@
+
 [versions]
 agp = "8.12.0"
 coilCompose = "3.2.0"
@@ -27,6 +28,8 @@ datastore = "1.0.0"
 kotlinx-serialization = "1.7.3"
 firebaseBom = "34.5.0"
 foundation = "1.9.5"
+turbine = "0.13.0"
+playServicesAuth = "21.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -54,10 +57,13 @@ koin-androidx-navigation = { module = "io.insert-koin:koin-androidx-navigation",
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockk" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navcompose"}
 datastore = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore"}
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
 
 #firebase
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" } # FIXED: Removed version.ref to be managed by BOM
@@ -88,4 +94,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref="ksp"}
 
 [bundles]
 local = ["room-runtime", "room-ktx", "room-rxjava2", "room-rxjava3", "room-guava", "room-paging" ]
-firebase = ["firebase-analytics", "firebase-auth", "firebase-database", "firebase-messaging"]
+firebase = ["firebase-analytics", "firebase-auth", "firebase-database", "firebase-messaging", "play-services-auth"]

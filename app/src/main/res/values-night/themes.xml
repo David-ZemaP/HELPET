@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.HELPET" parent="Theme.Material3.DayNight">
+    <style name="Theme.Helpet" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/purple_200</item>
         <item name="colorPrimaryContainer">@color/purple_700</item>
@@ -12,5 +12,11 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimary</item>
         <!-- Customize your theme here. -->
+    </style>
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#1E122B</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logohelpetsinfondo</item>
+        <item name="postSplashScreenTheme">@style/Theme.Helpet</item>
     </style>
 </resources>

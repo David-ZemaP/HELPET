@@ -1,5 +1,6 @@
 package com.ucb.helpet.di
 
+import com.google.android.gms.auth.api.identity.Identity
 import com.ucb.helpet.features.home.data.datasource.PetRemoteDataSource
 import com.ucb.helpet.features.home.domain.repository.PetRepository
 import com.ucb.helpet.features.home.domain.repository.PetRepositoryImpl
@@ -7,6 +8,10 @@ import com.ucb.helpet.features.home.domain.usecase.GetPetByIdUseCase
 import com.ucb.helpet.features.home.domain.usecase.GetUserPetsUseCase
 import com.ucb.helpet.features.home.domain.usecase.ReportPetUseCase
 import com.ucb.helpet.features.home.presentation.detail.PetDetailViewModel
+import com.ucb.helpet.features.home.domain.usecase.GetAllPetsUseCase
+import com.ucb.helpet.features.home.domain.usecase.GetUserPetsUseCase
+import com.ucb.helpet.features.home.domain.usecase.ReportPetUseCase
+import com.ucb.helpet.features.home.presentation.HomeViewModel
 import com.ucb.helpet.features.home.presentation.report.ReportPetViewModel
 import com.ucb.helpet.features.login.data.api.FirebaseService
 import com.ucb.helpet.features.login.data.database.AppDatabase
@@ -23,11 +28,14 @@ import com.ucb.helpet.features.login.domain.usecases.LoginUseCase
 import com.ucb.helpet.features.login.domain.usecases.LogoutUseCase
 import com.ucb.helpet.features.login.presentation.LoginViewModel
 import com.ucb.helpet.features.login.presentation.forgotpassword.ForgotPasswordViewModel
+import com.ucb.helpet.features.login.presentation.google.GoogleAuthUiClient
 import com.ucb.helpet.features.login.presentation.register.RegisterViewModel
 import com.ucb.helpet.features.notifications.NotificationHelper
 import com.ucb.helpet.features.profile.presentation.ProfileViewModel
 import com.ucb.helpet.features.splash.presentation.SplashViewModel
+import com.ucb.helpet.features.search.presentation.SearchViewModel
 import org.koin.android.ext.koin.androidContext
+
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -42,6 +50,10 @@ val appModule = module {
 
     // DataStore
     single<IRepositoryDataStore> { LoginDataStore(androidContext()) }
+
+    //Google Auth
+    single { Identity.getSignInClient(androidContext()) }
+    single { GoogleAuthUiClient(androidContext(), get()) }
 
     // DataSources
     single { LoginRemoteDataSource(get()) }
@@ -64,13 +76,16 @@ val appModule = module {
     factory { ReportPetUseCase(get(), get()) }
     factory { GetUserPetsUseCase(get()) }
     factory { GetPetByIdUseCase(get()) }
+    factory { GetAllPetsUseCase(get()) }
 
     // ViewModels
-    viewModel { LoginViewModel(get(), get()) }
+    viewModel { LoginViewModel(get(), get(), get()) }
     viewModel { RegisterViewModel(get()) }
     viewModel { ForgotPasswordViewModel(get()) }
     viewModel { SplashViewModel(get()) }
     viewModel { ProfileViewModel(get(), get(), get()) }
+    viewModel { SearchViewModel(get()) }
+    viewModel { HomeViewModel(get()) }
 
     // FIX: Inject LoginRepository (the second 'get()') to fetch User ID
     viewModel { ReportPetViewModel(get(), get(), get()) }

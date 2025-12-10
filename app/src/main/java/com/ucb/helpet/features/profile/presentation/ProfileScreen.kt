@@ -44,16 +44,7 @@ fun ProfileScreen(
         }
     }
 
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onReportPetClick,
-                containerColor = MaterialTheme.colorScheme.secondary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Nueva Publicación", tint = Color.White)
-            }
-        }
-    ) { paddingValues ->
+    Scaffold() { paddingValues ->
 
         // FIX: Added Loading and Error branches
         when (val state = uiState) {
