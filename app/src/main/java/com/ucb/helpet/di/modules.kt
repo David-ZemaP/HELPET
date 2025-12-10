@@ -1,5 +1,6 @@
 package com.ucb.helpet.di
 
+import com.google.android.gms.auth.api.identity.Identity
 import com.ucb.helpet.features.home.data.datasource.PetRemoteDataSource
 import com.ucb.helpet.features.home.domain.repository.PetRepository
 import com.ucb.helpet.features.home.domain.repository.PetRepositoryImpl
@@ -23,6 +24,7 @@ import com.ucb.helpet.features.login.domain.usecases.LoginUseCase
 import com.ucb.helpet.features.login.domain.usecases.LogoutUseCase
 import com.ucb.helpet.features.login.presentation.LoginViewModel
 import com.ucb.helpet.features.login.presentation.forgotpassword.ForgotPasswordViewModel
+import com.ucb.helpet.features.login.presentation.google.GoogleAuthUiClient
 import com.ucb.helpet.features.login.presentation.register.RegisterViewModel
 import com.ucb.helpet.features.profile.presentation.ProfileViewModel
 import com.ucb.helpet.features.splash.presentation.SplashViewModel
@@ -44,6 +46,10 @@ val appModule = module {
     // DataStore
     single<IRepositoryDataStore> { LoginDataStore(androidContext()) }
 
+    //Google Auth
+    single { Identity.getSignInClient(androidContext()) }
+    single { GoogleAuthUiClient(androidContext(), get()) }
+
     // DataSources
     single { LoginRemoteDataSource(get()) }
     single { PetRemoteDataSource() }
@@ -64,7 +70,7 @@ val appModule = module {
     factory { GetAllPetsUseCase(get()) }
 
     // ViewModels
-    viewModel { LoginViewModel(get(), get()) }
+    viewModel { LoginViewModel(get(), get(), get()) }
     viewModel { RegisterViewModel(get()) }
     viewModel { ForgotPasswordViewModel(get()) }
     viewModel { SplashViewModel(get()) }
