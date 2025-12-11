@@ -10,10 +10,8 @@ import kotlinx.coroutines.flow.map
 interface PetRepository {
     suspend fun reportPet(pet: Pet): Resource<Unit>
     // NEW
-    suspend fun getPetsByOwner(ownerId: String): Resource<List<Pet>>
-
-    suspend fun getPetById(petId: String): Resource<Pet>
     fun getPetsByOwner(ownerId: String): Flow<Resource<List<Pet>>>
+    suspend fun getPetById(petId: String): Resource<Pet>
     fun getAllPets(): Flow<Resource<List<Pet>>>
 }
 

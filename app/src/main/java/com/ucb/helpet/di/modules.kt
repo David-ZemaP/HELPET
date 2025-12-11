@@ -7,6 +7,8 @@ import com.ucb.helpet.features.home.domain.repository.PetRepositoryImpl
 import com.ucb.helpet.features.home.domain.usecase.GetPetByIdUseCase
 import com.ucb.helpet.features.home.presentation.detail.PetDetailViewModel
 import com.ucb.helpet.features.home.domain.usecase.GetAllPetsUseCase
+import com.ucb.helpet.features.home.domain.usecase.GetUserPetsUseCase
+import com.ucb.helpet.features.home.domain.usecase.ReportPetUseCase
 import com.ucb.helpet.features.home.presentation.HomeViewModel
 import com.ucb.helpet.features.home.presentation.report.ReportPetViewModel
 import com.ucb.helpet.features.login.data.api.FirebaseService
