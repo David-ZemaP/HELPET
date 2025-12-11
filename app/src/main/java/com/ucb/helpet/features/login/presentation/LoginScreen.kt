@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ucb.helpet.R
 import com.ucb.helpet.ui.theme.*
 import org.koin.androidx.compose.koinViewModel
 
@@ -55,7 +57,6 @@ fun LoginScreen(
         }
     )
 
-    // Usamos el fondo del tema (DarkBackground)
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -67,9 +68,6 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()
         ) {
-            // --- HEADER (Fuera de la tarjeta) ---
-
-            // Icono Circular
             Box(
                 modifier = Modifier
                     .size(64.dp)
@@ -79,7 +77,7 @@ fun LoginScreen(
                 Icon(
                     imageVector = Icons.Outlined.FavoriteBorder,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer, // VioletPrimary
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -87,36 +85,34 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Bienvenido a Helpet",
+                text = stringResource(R.string.login_welcome_title),
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground, // TextWhite
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Inicia sesión para ayudar a reunir mascotas con sus familias",
+                text = stringResource(R.string.login_welcome_subtitle),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant // TextGray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // --- TARJETA DEL FORMULARIO ---
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface // CardBackground
+                    containerColor = MaterialTheme.colorScheme.surface
                 ),
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline) // BorderColor
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp)
                 ) {
-                    // Manejo de Errores Visual
                     if (uiState is LoginUiState.Error) {
                         Text(
                             text = (uiState as LoginUiState.Error).message,
@@ -126,33 +122,31 @@ fun LoginScreen(
                         )
                     }
 
-                    // Campo Email (Estilo Dark)
                     CustomDarkInput(
-                        label = "Email",
+                        label = stringResource(R.string.login_email_label),
                         value = email,
                         onValueChange = { email = it },
-                        placeholder = "tucorreo@ejemplo.com",
+                        placeholder = stringResource(R.string.login_email_placeholder),
                         icon = Icons.Default.Email,
                         keyboardType = KeyboardType.Email
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Label Contraseña + Link Olvidaste Contraseña
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Contraseña",
+                            text = stringResource(R.string.login_password_label),
                             color = MaterialTheme.colorScheme.onBackground,
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Medium
                         )
                         Text(
-                            text = "¿Olvidaste tu contraseña?",
-                            color = MaterialTheme.colorScheme.onPrimaryContainer, // VioletPrimary
+                            text = stringResource(R.string.login_forgot_password),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.clickable { onForgotPasswordClick() }
                         )
@@ -160,12 +154,11 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Campo Contraseña (Sin label automático para usar el layout de arriba)
                     CustomDarkInput(
                         label = "",
                         value = password,
                         onValueChange = { password = it },
-                        placeholder = "••••••••",
+                        placeholder = stringResource(R.string.login_password_placeholder),
                         icon = Icons.Default.Lock,
                         keyboardType = KeyboardType.Password,
                         isPassword = true
@@ -173,14 +166,13 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Botón Iniciar Sesión
                     Button(
                         onClick = { viewModel.login(email, password) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary // VioletButton
+                            containerColor = MaterialTheme.colorScheme.primary
                         ),
                         shape = RoundedCornerShape(12.dp),
                         enabled = uiState !is LoginUiState.Loading
@@ -192,7 +184,7 @@ fun LoginScreen(
                             )
                         } else {
                             Text(
-                                "Iniciar Sesión",
+                                stringResource(R.string.login_button),
                                 color = MaterialTheme.colorScheme.onPrimary,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -201,14 +193,13 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Divisor "o"
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Divider(
                             modifier = Modifier.weight(1f),
                             color = MaterialTheme.colorScheme.outline
                         )
                         Text(
-                            " o ",
+                            stringResource(R.string.login_or_divider),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Divider(
@@ -219,7 +210,6 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Botón Google
                     OutlinedButton(
                         onClick = { viewModel.onGoogleSignInClicked() },
                         modifier = Modifier
@@ -231,7 +221,6 @@ fun LoginScreen(
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        // Puedes reemplazar la "G" por un Icono real si tienes el recurso
                         Text(
                             "G",
                             fontWeight = FontWeight.Bold,
@@ -240,7 +229,7 @@ fun LoginScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            "Continuar con Google",
+                            stringResource(R.string.login_google_button),
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
@@ -249,15 +238,14 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Footer Registro
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "¿No tienes cuenta? ",
+                    stringResource(R.string.login_no_account),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Regístrate",
-                    color = MaterialTheme.colorScheme.onPrimaryContainer, // VioletPrimary
+                    text = stringResource(R.string.login_register_button),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.clickable { onRegisterClick() }
                 )
@@ -268,7 +256,7 @@ fun LoginScreen(
     LaunchedEffect(uiState) {
         when (val result = uiState) {
             is LoginUiState.Success -> {
-                Toast.makeText(context, "¡Bienvenido!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.login_success_toast), Toast.LENGTH_SHORT).show()
             }
             is LoginUiState.LaunchGoogleSignIn -> {
                 result.intentSender?.let {
@@ -282,7 +270,6 @@ fun LoginScreen(
     }
 }
 
-// --- COMPONENTE REUTILIZABLE PARA INPUTS (Si no está compartido globalmente) ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CustomDarkInput(
@@ -313,7 +300,7 @@ private fun CustomDarkInput(
             placeholder = {
                 Text(
                     placeholder,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant // TextGray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
             leadingIcon = if (icon != null) {
@@ -338,10 +325,10 @@ private fun CustomDarkInput(
             } else null,
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant, // InputBackground
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                 disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                cursorColor = MaterialTheme.colorScheme.onPrimaryContainer, // VioletPrimary
+                cursorColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 focusedTextColor = MaterialTheme.colorScheme.onBackground,

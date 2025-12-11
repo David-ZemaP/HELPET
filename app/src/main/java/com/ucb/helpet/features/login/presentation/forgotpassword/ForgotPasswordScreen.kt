@@ -32,11 +32,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ucb.helpet.R
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,12 +70,12 @@ fun ForgotPasswordScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Recuperar Contraseña",
+                text = stringResource(R.string.forgot_password_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña",
+                text = stringResource(R.string.forgot_password_subtitle),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 32.dp)
             )
@@ -90,7 +92,7 @@ fun ForgotPasswordScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
+                label = { Text(stringResource(R.string.forgot_password_email_label)) },
                 leadingIcon = { Icon(Icons.Default.Email, null) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = uiState !is ForgotPasswordUiState.Loading,
@@ -102,11 +104,11 @@ fun ForgotPasswordScreen(
                 enabled = uiState !is ForgotPasswordUiState.Loading,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Enviar Enlace")
+                Text(stringResource(R.string.forgot_password_send_link_button))
             }
             Spacer(modifier = Modifier.height(16.dp))
             TextButton(onClick = onBackToLoginClick) {
-                Text("Volver al inicio de sesión")
+                Text(stringResource(R.string.forgot_password_back_to_login))
             }
         }
 

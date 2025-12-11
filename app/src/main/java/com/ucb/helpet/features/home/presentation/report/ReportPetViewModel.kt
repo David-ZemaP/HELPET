@@ -1,7 +1,9 @@
 package com.ucb.helpet.features.home.presentation.report
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.ucb.helpet.R
 import com.ucb.helpet.features.home.domain.model.Pet
 import com.ucb.helpet.features.home.domain.repository.PetRepository
 import com.ucb.helpet.features.login.domain.repository.LoginRepository
@@ -19,10 +21,11 @@ sealed class ReportPetUiState {
 }
 
 class ReportPetViewModel(
+    application: Application,
     private val repository: PetRepository,
     private val loginRepository: LoginRepository, // Changed from IRepositoryDataStore
     private val notificationHelper: NotificationHelper
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow<ReportPetUiState>(ReportPetUiState.Idle)
     val uiState: StateFlow<ReportPetUiState> = _uiState
@@ -32,7 +35,7 @@ class ReportPetViewModel(
             _uiState.value = ReportPetUiState.Loading
 
             if (pet.name.isBlank() || pet.type.isBlank() || pet.location.isBlank()) {
-                _uiState.value = ReportPetUiState.Error("Por favor completa los campos obligatorios (*)")
+                _uiState.value = ReportPetUiState.Error(getApplication<Application>().getString(R.string.report_pet_error_mandatory_fields))
                 return@launch
             }
 
@@ -59,7 +62,7 @@ class ReportPetViewModel(
                     else -> {}
                 }
             } catch (e: Exception) {
-                _uiState.value = ReportPetUiState.Error(e.message ?: "Error desconocido")
+                _uiState.value = ReportPetUiState.Error(e.message ?: getApplication<Application>().getString(R.string.error_unknown))
             }
         }
     }

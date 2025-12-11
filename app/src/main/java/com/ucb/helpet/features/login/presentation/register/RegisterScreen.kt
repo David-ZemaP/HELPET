@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -31,13 +32,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.ucb.helpet.R
 import org.koin.androidx.compose.koinViewModel
-import androidx.compose.material3.MenuAnchorType // Make sure this is imported
+import androidx.compose.material3.MenuAnchorType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = koinViewModel()) {
-    // Estados del formulario
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -48,18 +49,16 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
     var license by remember { mutableStateOf("") }
     var termsAccepted by remember { mutableStateOf(false) }
 
-    // UI State
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    // Dropdown state
     var userTypeExpanded by remember { mutableStateOf(false) }
-    val userTypes = listOf("Dueño de Mascota", "Veterinario")
+    val userTypes = listOf(stringResource(R.string.register_user_type_owner), stringResource(R.string.register_user_type_veterinary))
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
             is RegisterUiState.Success -> {
-                Toast.makeText(context, "Cuenta creada exitosamente", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.register_success_toast), Toast.LENGTH_SHORT).show()
                 navController.navigate("login") {
                     popUpTo("register") { inclusive = true }
                 }
@@ -73,7 +72,6 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
         }
     }
 
-    // ESTRUCTURA PRINCIPAL
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -89,7 +87,6 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
         ) {
             Spacer(modifier = Modifier.height(48.dp))
 
-            // ICONO CABECERA
             Box(
                 modifier = Modifier
                     .size(64.dp)
@@ -106,16 +103,15 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // TITULOS
             Text(
-                text = "Únete a Helpet",
+                text = stringResource(R.string.register_title),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Crea tu cuenta y empieza a ayudar",
+                text = stringResource(R.string.register_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -123,7 +119,6 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // TARJETA DEL FORMULARIO
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -132,9 +127,8 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
             ) {
                 Column(modifier = Modifier.padding(24.dp)) {
 
-                    // SELECTOR DE TIPO DE USUARIO
                     Text(
-                        "Tipo de Usuario *",
+                        stringResource(R.string.register_user_type_label),
                         color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Medium
@@ -146,10 +140,10 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                         onExpandedChange = { userTypeExpanded = !userTypeExpanded }
                     ) {
                         TextField(
-                            value = if (userType == UserType.VETERINARY) "Veterinario" else "Dueño de Mascota",
+                            value = if (userType == UserType.VETERINARY) stringResource(R.string.register_user_type_veterinary) else stringResource(R.string.register_user_type_owner),
                             onValueChange = {},
                             readOnly = true,
-                            placeholder = { Text("Selecciona tu rol", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                            placeholder = { Text(stringResource(R.string.register_user_type_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = userTypeExpanded) },
                             leadingIcon = {
                                 Icon(
@@ -160,7 +154,6 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                // FIX: Use PrimaryNotEditable instead of Primary
                                 .menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true),
                             shape = RoundedCornerShape(12.dp),
                             colors = TextFieldDefaults.colors(
@@ -181,7 +174,7 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                                 DropdownMenuItem(
                                     text = { Text(selectionOption, color = MaterialTheme.colorScheme.onSurface) },
                                     onClick = {
-                                        userType = if (selectionOption == "Veterinario") UserType.VETERINARY else UserType.CLIENT
+                                        userType = if (selectionOption == context.getString(R.string.register_user_type_veterinary)) UserType.VETERINARY else UserType.CLIENT
                                         userTypeExpanded = false
                                     }
                                 )
@@ -191,22 +184,21 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // CAMPOS COMUNES
                     CustomThemeInput(
-                        label = "Nombre Completo *",
+                        label = stringResource(R.string.register_full_name_label),
                         value = name,
                         onValueChange = { name = it },
-                        placeholder = "Juan Pérez",
+                        placeholder = stringResource(R.string.register_full_name_placeholder),
                         icon = Icons.Default.Person
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     CustomThemeInput(
-                        label = "Email *",
+                        label = stringResource(R.string.register_email_label),
                         value = email,
                         onValueChange = { email = it },
-                        placeholder = "correo@ejemplo.com",
+                        placeholder = stringResource(R.string.register_email_placeholder),
                         icon = Icons.Default.Email,
                         keyboardType = KeyboardType.Email
                     )
@@ -214,10 +206,10 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     CustomThemeInput(
-                        label = "Teléfono (Opcional)",
+                        label = stringResource(R.string.register_phone_label),
                         value = phone,
                         onValueChange = { phone = it },
-                        placeholder = "+591 123 456 78",
+                        placeholder = stringResource(R.string.register_phone_placeholder),
                         icon = Icons.Default.Phone,
                         keyboardType = KeyboardType.Phone
                     )
@@ -225,16 +217,15 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     CustomThemeInput(
-                        label = "Ubicación (Opcional)",
+                        label = stringResource(R.string.register_location_label),
                         value = location,
                         onValueChange = { location = it },
-                        placeholder = "Ciudad, País",
+                        placeholder = stringResource(R.string.register_location_placeholder),
                         icon = Icons.Default.LocationOn
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // CAMPOS VETERINARIO
                     if (userType == UserType.VETERINARY) {
                         Card(
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
@@ -242,23 +233,23 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    "Información Profesional",
+                                    stringResource(R.string.register_vet_info_title),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 CustomThemeInput(
-                                    label = "Matrícula/Licencia *",
+                                    label = stringResource(R.string.register_vet_license_label),
                                     value = license,
                                     onValueChange = { license = it },
-                                    placeholder = "Nro. Licencia",
+                                    placeholder = stringResource(R.string.register_vet_license_placeholder),
                                     icon = Icons.Default.Badge
                                 )
 
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    "Tu licencia será verificada.",
+                                    stringResource(R.string.register_vet_license_disclaimer),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 12.sp
@@ -268,12 +259,11 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
-                    // CONTRASEÑAS
                     CustomThemeInput(
-                        label = "Contraseña *",
+                        label = stringResource(R.string.register_password_label),
                         value = password,
                         onValueChange = { password = it },
-                        placeholder = "Mínimo 8 caracteres",
+                        placeholder = stringResource(R.string.register_password_placeholder),
                         icon = Icons.Default.Lock,
                         isPassword = true
                     )
@@ -281,17 +271,17 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     CustomThemeInput(
-                        label = "Confirmar Contraseña *",
+                        label = stringResource(R.string.register_confirm_password_label),
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
-                        placeholder = "Repite la contraseña",
+                        placeholder = stringResource(R.string.register_confirm_password_placeholder),
                         icon = Icons.Default.LockClock,
                         isPassword = true
                     )
 
                     if (password.isNotEmpty() && confirmPassword.isNotEmpty() && password != confirmPassword) {
                         Text(
-                            "Las contraseñas no coinciden",
+                            stringResource(R.string.register_passwords_no_match),
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = 4.dp)
@@ -300,7 +290,6 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // TÉRMINOS Y CONDICIONES
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
@@ -315,16 +304,16 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                             )
                         )
                         val annotatedString = buildAnnotatedString {
-                            append("Acepto los ")
+                            append(stringResource(R.string.register_i_agree_to))
                             pushStringAnnotation(tag = "TERMS", annotation = "terms")
                             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)) {
-                                append("términos")
+                                append(stringResource(R.string.register_terms))
                             }
                             pop()
-                            append(" y ")
+                            append(stringResource(R.string.register_and))
                             pushStringAnnotation(tag = "PRIVACY", annotation = "privacy")
                             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)) {
-                                append("política de privacidad")
+                                append(stringResource(R.string.register_privacy_policy))
                             }
                             pop()
                         }
@@ -337,13 +326,12 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // BOTÓN DE REGISTRO
                     Button(
                         onClick = {
                             if (password == confirmPassword) {
                                 viewModel.register(name, email, password, userType, phone, location)
                             } else {
-                                Toast.makeText(context, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.register_passwords_no_match), Toast.LENGTH_SHORT).show()
                             }
                         },
                         modifier = Modifier
@@ -362,27 +350,26 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
                         } else {
-                            Text("Crear Cuenta", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary)
+                            Text(stringResource(R.string.register_create_account_button), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary)
                         }
                     }
                 }
-            } // Fin Card
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // FOOTER (Divisor y Login)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
-                Text(" o ", modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.register_or_divider), modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             val loginText = buildAnnotatedString {
-                append("¿Ya tienes una cuenta? ")
+                append(stringResource(R.string.register_already_have_account))
                 withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)) {
-                    append("Inicia sesión")
+                    append(stringResource(R.string.register_login_button))
                 }
             }
             ClickableText(
@@ -396,7 +383,6 @@ fun RegisterScreen(navController: NavController, viewModel: RegisterViewModel = 
     }
 }
 
-// COMPONENTE REUTILIZABLE ADAPTADO AL TEMA
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CustomThemeInput(

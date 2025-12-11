@@ -21,11 +21,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.ucb.helpet.R
 import com.ucb.helpet.features.home.domain.model.Pet
 import org.koin.androidx.compose.koinViewModel
 
@@ -68,13 +71,13 @@ fun ReportPetScreen(
     var typeExpanded by remember { mutableStateOf(false) }
     var sizeExpanded by remember { mutableStateOf(false) }
 
-    val animalTypes = listOf("Perro", "Gato", "Ave", "Otro")
-    val sizes = listOf("Pequeño", "Mediano", "Grande")
+    val animalTypes = stringArrayResource(R.array.animal_types).toList()
+    val sizes = stringArrayResource(R.array.pet_sizes).toList()
 
     // Handle Success
     LaunchedEffect(uiState) {
         if (uiState is ReportPetUiState.Success) {
-            Toast.makeText(context, "Publicación creada exitosamente", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.report_pet_success_toast), Toast.LENGTH_SHORT).show()
             navController.popBackStack()
             viewModel.resetState()
         }
@@ -83,12 +86,12 @@ fun ReportPetScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Crear Publicación", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.report_pet_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     TextButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Volver", color = MaterialTheme.colorScheme.primary)
+                        Text(stringResource(R.string.report_pet_back_button), color = MaterialTheme.colorScheme.primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
@@ -103,24 +106,24 @@ fun ReportPetScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Text("Completa la información para ayudarnos a encontrar a la mascota", color = Color.Gray, fontSize = 14.sp)
+                Text(stringResource(R.string.report_pet_subtitle), color = Color.Gray, fontSize = 14.sp)
             }
 
             // 1. Publication Type (Lost vs Found)
             item {
-                SectionTitle("Tipo de Publicación")
+                SectionTitle(stringResource(R.string.report_pet_publication_type_section_title))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     SelectionCard(
-                        title = "Mascota Perdida",
-                        subtitle = "Busco a mi mascota",
+                        title = stringResource(R.string.report_pet_lost_pet_option),
+                        subtitle = stringResource(R.string.report_pet_lost_pet_subtitle),
                         icon = "😢", // You can use a real Icon here
                         isSelected = status == "Perdido",
                         onClick = { status = "Perdido" },
                         modifier = Modifier.weight(1f)
                     )
                     SelectionCard(
-                        title = "Mascota Encontrada",
-                        subtitle = "Encontré una mascota",
+                        title = stringResource(R.string.report_pet_found_pet_option),
+                        subtitle = stringResource(R.string.report_pet_found_pet_subtitle),
                         icon = "\uD83C\uDF89", // Party popper emoji
                         isSelected = status == "Encontrado",
                         onClick = { status = "Encontrado" },
@@ -131,7 +134,7 @@ fun ReportPetScreen(
 
             // 2. Photo Upload
             item {
-                SectionTitle("Foto de la Mascota *")
+                SectionTitle(stringResource(R.string.report_pet_photo_section_title))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -148,19 +151,19 @@ fun ReportPetScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Outlined.FileUpload, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Sube una foto clara", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.report_pet_upload_photo_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
 
             // 3. Pet Info
             item {
-                CardSection("Información de la Mascota") {
-                    FormInput(label = "Nombre *", value = name, onValueChange = { name = it }, placeholder = "Ej: Max")
+                CardSection(stringResource(R.string.report_pet_info_section_title)) {
+                    FormInput(label = stringResource(R.string.report_pet_name_label), value = name, onValueChange = { name = it }, placeholder = stringResource(R.string.report_pet_name_placeholder))
 
                     // Type Dropdown
                     ExposedDropdown(
-                        label = "Tipo de Animal *",
+                        label = stringResource(R.string.report_pet_type_label),
                         options = animalTypes,
                         selectedOption = type,
                         onOptionSelected = { type = it },
@@ -168,12 +171,12 @@ fun ReportPetScreen(
                         onExpandedChange = { typeExpanded = it }
                     )
 
-                    FormInput(label = "Raza", value = breed, onValueChange = { breed = it }, placeholder = "Ej: Labrador, Mestizo")
-                    FormInput(label = "Color Principal", value = color, onValueChange = { color = it }, placeholder = "Ej: Negro, Marrón")
+                    FormInput(label = stringResource(R.string.report_pet_breed_label), value = breed, onValueChange = { breed = it }, placeholder = stringResource(R.string.report_pet_breed_placeholder))
+                    FormInput(label = stringResource(R.string.report_pet_color_label), value = color, onValueChange = { color = it }, placeholder = stringResource(R.string.report_pet_color_placeholder))
 
                     // Size Dropdown
                     ExposedDropdown(
-                        label = "Tamaño",
+                        label = stringResource(R.string.report_pet_size_label),
                         options = sizes,
                         selectedOption = size,
                         onOptionSelected = { size = it },
@@ -181,38 +184,38 @@ fun ReportPetScreen(
                         onExpandedChange = { sizeExpanded = it }
                     )
 
-                    FormInput(label = "Edad Aproximada", value = age, onValueChange = { age = it }, placeholder = "Ej: 2 años, Cachorro")
+                    FormInput(label = stringResource(R.string.report_pet_age_label), value = age, onValueChange = { age = it }, placeholder = stringResource(R.string.report_pet_age_placeholder))
                 }
             }
 
             // 4. Location & Date
             item {
-                CardSection("Ubicación y Fecha") {
-                    FormInput(label = "Última vez visto *", value = lastSeenDate, onValueChange = { lastSeenDate = it }, placeholder = "dd/mm/aaaa", icon = Icons.Default.CalendarToday)
-                    FormInput(label = "Dirección/Zona *", value = address, onValueChange = { address = it }, placeholder = "Ej: Av. Santa Fe 1234")
-                    FormInput(label = "Ciudad *", value = city, onValueChange = { city = it }, placeholder = "Ej: Buenos Aires")
+                CardSection(stringResource(R.string.report_pet_location_date_section_title)) {
+                    FormInput(label = stringResource(R.string.report_pet_last_seen_date_label), value = lastSeenDate, onValueChange = { lastSeenDate = it }, placeholder = stringResource(R.string.report_pet_last_seen_date_placeholder), icon = Icons.Default.CalendarToday)
+                    FormInput(label = stringResource(R.string.report_pet_address_label), value = address, onValueChange = { address = it }, placeholder = stringResource(R.string.report_pet_address_placeholder))
+                    FormInput(label = stringResource(R.string.report_pet_city_label), value = city, onValueChange = { city = it }, placeholder = stringResource(R.string.report_pet_city_placeholder))
                 }
             }
 
             // 5. Detailed Description
             item {
-                CardSection("Descripción Detallada") {
+                CardSection(stringResource(R.string.report_pet_description_section_title)) {
                     FormInput(
-                        label = "Descripción *",
+                        label = stringResource(R.string.report_pet_description_label),
                         value = description,
                         onValueChange = { description = it },
-                        placeholder = "Describe características distintivas...",
+                        placeholder = stringResource(R.string.report_pet_description_placeholder),
                         minLines = 3
                     )
-                    Text("0 caracteres (mínimo 20)", style = MaterialTheme.typography.bodySmall, color = Color.Gray, modifier = Modifier.padding(start = 4.dp))
+                    Text(stringResource(R.string.report_pet_description_char_counter), style = MaterialTheme.typography.bodySmall, color = Color.Gray, modifier = Modifier.padding(start = 4.dp))
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     FormInput(
-                        label = "Información Adicional (Opcional)",
+                        label = stringResource(R.string.report_pet_additional_info_label),
                         value = additionalInfo,
                         onValueChange = { additionalInfo = it },
-                        placeholder = "Collar, chip, condición de salud...",
+                        placeholder = stringResource(R.string.report_pet_additional_info_placeholder),
                         minLines = 2
                     )
                 }
@@ -220,20 +223,20 @@ fun ReportPetScreen(
 
             // 6. Contact Info
             item {
-                CardSection("Información de Contacto") {
-                    FormInput(label = "Nombre", value = contactName, onValueChange = { contactName = it }, placeholder = "Tu nombre")
-                    FormInput(label = "Teléfono", value = contactPhone, onValueChange = { contactPhone = it }, placeholder = "+54 9 11 ...", keyboardType = KeyboardType.Phone)
-                    FormInput(label = "Email", value = contactEmail, onValueChange = { contactEmail = it }, placeholder = "correo@ejemplo.com", keyboardType = KeyboardType.Email)
-                    Text("* Al menos un método de contacto es requerido", style = MaterialTheme.typography.bodySmall, color = Color.Gray, modifier = Modifier.padding(top = 8.dp))
+                CardSection(stringResource(R.string.report_pet_contact_info_section_title)) {
+                    FormInput(label = stringResource(R.string.report_pet_contact_name_label), value = contactName, onValueChange = { contactName = it }, placeholder = stringResource(R.string.report_pet_contact_name_placeholder))
+                    FormInput(label = stringResource(R.string.report_pet_contact_phone_label), value = contactPhone, onValueChange = { contactPhone = it }, placeholder = stringResource(R.string.report_pet_contact_phone_placeholder), keyboardType = KeyboardType.Phone)
+                    FormInput(label = stringResource(R.string.report_pet_contact_email_label), value = contactEmail, onValueChange = { contactEmail = it }, placeholder = stringResource(R.string.report_pet_contact_email_placeholder), keyboardType = KeyboardType.Email)
+                    Text(stringResource(R.string.report_pet_contact_info_disclaimer), style = MaterialTheme.typography.bodySmall, color = Color.Gray, modifier = Modifier.padding(top = 8.dp))
                 }
             }
 
             // 7. Reward
             item {
-                CardSection("Recompensa (Opcional)", icon = Icons.Default.MonetizationOn) {
+                CardSection(stringResource(R.string.report_pet_reward_section_title), icon = Icons.Default.MonetizationOn) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(checked = hasReward, onCheckedChange = { hasReward = it })
-                        Text("Quiero ofrecer una recompensa por encontrar a mi mascota", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.report_pet_reward_checkbox_label), style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
@@ -257,7 +260,7 @@ fun ReportPetScreen(
                         modifier = Modifier.fillMaxWidth().height(50.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Cancelar")
+                        Text(stringResource(R.string.report_pet_cancel_button))
                     }
                     Button(
                         onClick = {
@@ -289,7 +292,7 @@ fun ReportPetScreen(
                         if (uiState is ReportPetUiState.Loading) {
                             CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                         } else {
-                            Text("Publicar")
+                            Text(stringResource(R.string.report_pet_publish_button))
                         }
                     }
                     Spacer(modifier = Modifier.height(32.dp))
@@ -379,7 +382,7 @@ fun ExposedDropdown(
             onExpandedChange = onExpandedChange
         ) {
             OutlinedTextField(
-                value = if (selectedOption.isEmpty()) "Selecciona" else selectedOption,
+                value = if (selectedOption.isEmpty()) stringResource(R.string.register_user_type_placeholder) else selectedOption,
                 onValueChange = {},
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
