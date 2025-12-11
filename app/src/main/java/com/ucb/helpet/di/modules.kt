@@ -90,6 +90,7 @@ val appModule = module {
     viewModel { SplashViewModel(get()) }
     viewModel { ProfileViewModel(get(), get(), get()) }
     viewModel { SearchViewModel(get()) }
+    viewModel { HomeViewModel(get(), get()) }
     viewModel { HomeViewModel(get()) }
     viewModel { RewardsViewModel(get()) }
 

@@ -26,10 +26,11 @@ ksp = "2.0.20-1.0.24"
 room = "2.8.0"
 datastore = "1.0.0"
 kotlinx-serialization = "1.7.3"
-firebaseBom = "34.5.0"
 foundation = "1.9.5"
 turbine = "0.13.0"
 playServicesAuth = "21.4.0"
+# Corrected to a stable and valid Firebase BOM version
+firebaseBom = "33.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -66,12 +67,12 @@ turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
 
 #firebase
-firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" } # FIXED: Removed version.ref to be managed by BOM
-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" } # FIXED: Corrected version.ref to "firebaseBom"
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+firebase-config-ktx = { group = "com.google.firebase", name = "firebase-config-ktx" }
 
 #room
 room-runtime = { group="androidx.room", name="room-runtime", version.ref="room"}
@@ -94,4 +95,5 @@ ksp = { id = "com.google.devtools.ksp", version.ref="ksp"}
 
 [bundles]
 local = ["room-runtime", "room-ktx", "room-rxjava2", "room-rxjava3", "room-guava", "room-paging" ]
-firebase = ["firebase-analytics", "firebase-auth", "firebase-database", "firebase-messaging", "play-services-auth"]
+# Correctly defined bundle including config-ktx. Versions are handled by the BOM.
+firebase = ["firebase-analytics", "firebase-auth", "firebase-database", "firebase-messaging", "play-services-auth", "firebase-config-ktx"]
