@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
-import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.Star
@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.ucb.helpet.R
+import org.koin.androidx.compose.koinViewModel
 
 data class RewardPet(
     val name: String,
@@ -50,8 +51,9 @@ data class Achievement(
 )
 
 @Composable
-fun RewardsScreen() {
+fun RewardsScreen(viewModel: RewardsViewModel = koinViewModel()) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val uiState by viewModel.uiState.collectAsState()
 
     LazyColumn(
         modifier = Modifier
@@ -87,7 +89,7 @@ fun RewardsScreen() {
                     title = stringResource(R.string.rewards_balance_label),
                     value = "1,200",
                     unit = stringResource(R.string.rewards_token_symbol),
-                    icon = Icons.Default.ContentCopy,
+                    icon = Icons.Default.AccountBalanceWallet,
                     backgroundColor = Color(0xFF10B981),
                     modifier = Modifier.weight(1f)
                 )
@@ -132,13 +134,19 @@ fun RewardsScreen() {
 
         when (selectedTabIndex) {
             0 -> {
-                val availablePets = listOf(
-                    RewardPet("Max", "Pastor alemán perdido cerca del parque", "Palermo", "Perdido hace 3 dias", 1000, "https://i.imgur.com/8zQ2X9C.png"),
-                    RewardPet("Coco", "Gato persa blanco muy cariñoso", "Recoleta", "Perdido hace 5 dias", 600, "https://i.imgur.com/8zQ2X9C.png")
-                )
-                items(availablePets) { pet ->
-                    RewardPetCard(pet = pet)
-                    Spacer(modifier = Modifier.height(16.dp))
+                when (val state = uiState) {
+                    is RewardsUiState.Loading -> {
+                        item { CircularProgressIndicator(modifier = Modifier.padding(16.dp)) }
+                    }
+                    is RewardsUiState.Success -> {
+                        items(state.rewards) { pet ->
+                            RewardPetCard(pet = pet)
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                    }
+                    is RewardsUiState.Error -> {
+                        item { Text(text = state.message, color = Color.Red, modifier = Modifier.padding(16.dp)) }
+                    }
                 }
             }
             1 -> {
