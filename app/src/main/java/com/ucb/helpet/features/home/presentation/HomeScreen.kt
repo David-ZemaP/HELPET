@@ -142,7 +142,13 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = koin
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedItemIndex) {
-                0 -> HomeContent(navController = navController, homeViewModel = homeViewModel)
+                0 -> HomeContent(
+                    navController = navController,
+                    homeViewModel = homeViewModel,
+                    onViewAllPetsClick = { selectedItemIndex = 1 },
+                    onReportLostClick = { navController.navigate("report_pet") },
+                    onSearchPetsClick = { selectedItemIndex = 1 }
+                )
                 1 -> SearchScreen(navController = navController, viewModel = koinViewModel())
                 2 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = stringResource(R.string.home_bottom_nav_rewards)) }
                 3 -> ProfileScreen(
@@ -164,7 +170,13 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = koin
 }
 
 @Composable
-fun HomeContent(navController: NavController, homeViewModel: HomeViewModel) {
+fun HomeContent(
+    navController: NavController,
+    homeViewModel: HomeViewModel,
+    onViewAllPetsClick: () -> Unit,
+    onReportLostClick: () -> Unit,
+    onSearchPetsClick: () -> Unit
+) {
     val uiState by homeViewModel.uiState.collectAsState()
 
     LazyColumn(
@@ -209,7 +221,7 @@ fun HomeContent(navController: NavController, homeViewModel: HomeViewModel) {
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(
-                    onClick = { /* TODO */ },
+                    onClick = { onSearchPetsClick() },
                     modifier = Modifier.fillMaxWidth(0.8f)
                 ) {
                     Icon(imageVector = Icons.Default.Search, contentDescription = "Search Icon")
@@ -218,7 +230,7 @@ fun HomeContent(navController: NavController, homeViewModel: HomeViewModel) {
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
-                    onClick = { /* TODO */ },
+                    onClick = { onReportLostClick() },
                     modifier = Modifier.fillMaxWidth(0.8f)
                 ) {
                     Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Report Icon")
@@ -281,7 +293,7 @@ fun HomeContent(navController: NavController, homeViewModel: HomeViewModel) {
 
         item {
             OutlinedButton(
-                onClick = { /* TODO: Navigate to all pets screen */ },
+                onClick = { onViewAllPetsClick() },
                 modifier = Modifier.padding(top = 16.dp)
             ) {
                 Text(text = stringResource(R.string.home_view_all_pets_button))
