@@ -63,4 +63,8 @@ class LoginRemoteDataSource(private val firebaseService: FirebaseService) {
     fun getCurrentUserId(): String? {
         return firebaseService.auth.currentUser?.uid
     }
+
+    fun isFirebaseUserLoggedIn(): Boolean {
+        return firebaseService.auth.currentUser != null
+    }
 }
