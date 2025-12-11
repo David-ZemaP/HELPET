@@ -5,12 +5,8 @@ import com.ucb.helpet.features.home.data.datasource.PetRemoteDataSource
 import com.ucb.helpet.features.home.domain.repository.PetRepository
 import com.ucb.helpet.features.home.domain.repository.PetRepositoryImpl
 import com.ucb.helpet.features.home.domain.usecase.GetPetByIdUseCase
-import com.ucb.helpet.features.home.domain.usecase.GetUserPetsUseCase
-import com.ucb.helpet.features.home.domain.usecase.ReportPetUseCase
 import com.ucb.helpet.features.home.presentation.detail.PetDetailViewModel
 import com.ucb.helpet.features.home.domain.usecase.GetAllPetsUseCase
-import com.ucb.helpet.features.home.domain.usecase.GetUserPetsUseCase
-import com.ucb.helpet.features.home.domain.usecase.ReportPetUseCase
 import com.ucb.helpet.features.home.presentation.HomeViewModel
 import com.ucb.helpet.features.home.presentation.report.ReportPetViewModel
 import com.ucb.helpet.features.login.data.api.FirebaseService
@@ -34,6 +30,7 @@ import com.ucb.helpet.features.notifications.NotificationHelper
 import com.ucb.helpet.features.profile.presentation.ProfileViewModel
 import com.ucb.helpet.features.splash.presentation.SplashViewModel
 import com.ucb.helpet.features.search.presentation.SearchViewModel
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -79,7 +76,7 @@ val appModule = module {
     factory { GetAllPetsUseCase(get()) }
 
     // ViewModels
-    viewModel { LoginViewModel(get(), get(), get()) }
+    viewModel { LoginViewModel(androidApplication(), get(), get(), get()) }
     viewModel { RegisterViewModel(get()) }
     viewModel { ForgotPasswordViewModel(get()) }
     viewModel { SplashViewModel(get()) }
@@ -88,6 +85,6 @@ val appModule = module {
     viewModel { HomeViewModel(get()) }
 
     // FIX: Inject LoginRepository (the second 'get()') to fetch User ID
-    viewModel { ReportPetViewModel(get(), get(), get()) }
+    viewModel { ReportPetViewModel(androidApplication(), get(), get(), get()) }
     viewModel { PetDetailViewModel(get()) }
 }

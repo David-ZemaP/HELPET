@@ -17,11 +17,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import com.ucb.helpet.R
 import com.ucb.helpet.features.home.domain.model.Pet
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,10 +32,10 @@ fun PetDetailScreen(navController: NavController, pet: Pet) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Detalles de la Mascota") },
+                title = { Text(stringResource(R.string.pet_detail_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.pet_detail_back_button))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -51,7 +53,6 @@ fun PetDetailScreen(navController: NavController, pet: Pet) {
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // 1. Header Image & Status
             Box(modifier = Modifier.fillMaxWidth().height(250.dp)) {
                 AsyncImage(
                     model = pet.imageUrl,
@@ -59,7 +60,6 @@ fun PetDetailScreen(navController: NavController, pet: Pet) {
                     modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp)),
                     contentScale = ContentScale.Crop
                 )
-                // Status Badge
                 Surface(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -79,7 +79,6 @@ fun PetDetailScreen(navController: NavController, pet: Pet) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 2. Main Info (Name, Breed, etc)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(text = pet.name, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
@@ -88,39 +87,35 @@ fun PetDetailScreen(navController: NavController, pet: Pet) {
                 if (pet.hasReward) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.MonetizationOn, contentDescription = null, tint = Color(0xFFFFD700), modifier = Modifier.size(32.dp))
-                        Text("Recompensa", color = Color(0xFFFFD700), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.pet_detail_reward), color = Color(0xFFFFD700), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 3. Key Details Grid
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                DetailItem(icon = Icons.Default.Palette, label = "Color", value = pet.color)
-                DetailItem(icon = Icons.Default.Straighten, label = "Tamaño", value = pet.size)
-                DetailItem(icon = Icons.Default.Cake, label = "Edad", value = pet.age)
+                DetailItem(icon = Icons.Default.Palette, label = stringResource(R.string.pet_detail_color_label), value = pet.color)
+                DetailItem(icon = Icons.Default.Straighten, label = stringResource(R.string.pet_detail_size_label), value = pet.size)
+                DetailItem(icon = Icons.Default.Cake, label = stringResource(R.string.pet_detail_age_label), value = pet.age)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 4. Location & Date
-            DetailSection(title = "Ubicación y Fecha") {
-                InfoRowDetailed(icon = Icons.Default.LocationOn, label = "Visto en", value = "${pet.location}, ${pet.city}")
-                InfoRowDetailed(icon = Icons.Default.CalendarToday, label = "Fecha", value = pet.lastSeenDate)
+            DetailSection(title = stringResource(R.string.pet_detail_location_date_section_title)) {
+                InfoRowDetailed(icon = Icons.Default.LocationOn, label = stringResource(R.string.pet_detail_seen_at_label), value = "${pet.location}, ${pet.city}")
+                InfoRowDetailed(icon = Icons.Default.CalendarToday, label = stringResource(R.string.pet_detail_date_label), value = pet.lastSeenDate)
             }
 
-            // 5. Description
-            DetailSection(title = "Descripción") {
+            DetailSection(title = stringResource(R.string.pet_detail_description_section_title)) {
                 Text(text = pet.description, style = MaterialTheme.typography.bodyLarge, lineHeight = 24.sp)
                 if (pet.additionalInfo.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Nota: ${pet.additionalInfo}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+                    Text(text = stringResource(R.string.pet_detail_additional_info_note) + pet.additionalInfo, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
                 }
             }
 
-            // 6. Contact Info
-            DetailSection(title = "Contacto") {
+            DetailSection(title = stringResource(R.string.pet_detail_contact_section_title)) {
                 Card(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
                     modifier = Modifier.fillMaxWidth()
@@ -129,10 +124,10 @@ fun PetDetailScreen(navController: NavController, pet: Pet) {
                         Text(text = pet.contactName, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
                         Spacer(modifier = Modifier.height(8.dp))
                         if (pet.contactPhone.isNotEmpty()) {
-                            InfoRowDetailed(icon = Icons.Default.Phone, label = "Teléfono", value = pet.contactPhone)
+                            InfoRowDetailed(icon = Icons.Default.Phone, label = stringResource(R.string.pet_detail_phone_label), value = pet.contactPhone)
                         }
                         if (pet.contactEmail.isNotEmpty()) {
-                            InfoRowDetailed(icon = Icons.Default.Email, label = "Email", value = pet.contactEmail)
+                            InfoRowDetailed(icon = Icons.Default.Email, label = stringResource(R.string.pet_detail_email_label), value = pet.contactEmail)
                         }
                     }
                 }
@@ -140,7 +135,6 @@ fun PetDetailScreen(navController: NavController, pet: Pet) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Action Button (Call/Message placeholder)
             Button(
                 onClick = { /* TODO: Open Dial */ },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -148,7 +142,7 @@ fun PetDetailScreen(navController: NavController, pet: Pet) {
             ) {
                 Icon(Icons.Default.Phone, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Contactar Dueño")
+                Text(stringResource(R.string.pet_detail_contact_owner_button))
             }
         }
     }

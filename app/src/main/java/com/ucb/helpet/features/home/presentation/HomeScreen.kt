@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -65,6 +66,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import coil3.compose.AsyncImage
 import com.google.gson.Gson
+import com.ucb.helpet.R
 import com.ucb.helpet.features.home.domain.model.Pet
 import com.ucb.helpet.features.profile.presentation.ProfileScreen
 import com.ucb.helpet.features.search.presentation.SearchScreen
@@ -76,22 +78,22 @@ sealed class BottomNavItem(
     val unselectedIcon: ImageVector,
 ) {
     object Home : BottomNavItem(
-        title = "Inicio",
+        title = "home_bottom_nav_home",
         selectedIcon = Icons.Filled.Home,
         unselectedIcon = Icons.Outlined.Home,
     )
     object Search : BottomNavItem(
-        title = "Buscar",
+        title = "home_bottom_nav_search",
         selectedIcon = Icons.Filled.Search,
         unselectedIcon = Icons.Outlined.Search,
     )
     object Rewards : BottomNavItem(
-        title = "Recompensas",
+        title = "home_bottom_nav_rewards",
         selectedIcon = Icons.Filled.Star,
         unselectedIcon = Icons.Outlined.StarBorder,
     )
     object Profile : BottomNavItem(
-        title = "Perfil",
+        title = "home_bottom_nav_profile",
         selectedIcon = Icons.Filled.Person,
         unselectedIcon = Icons.Outlined.Person,
     )
@@ -116,12 +118,12 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = koin
                     NavigationBarItem(
                         selected = selectedItemIndex == index,
                         onClick = { selectedItemIndex = index },
-                        label = { Text(text = item.title) },
+                        label = { Text(text = stringResource(id = R.string::class.java.getField(item.title).getInt(null))) },
                         alwaysShowLabel = true,
                         icon = {
                             Icon(
                                 imageVector = if (index == selectedItemIndex) item.selectedIcon else item.unselectedIcon,
-                                contentDescription = item.title
+                                contentDescription = stringResource(id = R.string::class.java.getField(item.title).getInt(null))
                             )
                         }
                     )
@@ -134,7 +136,7 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = koin
                 shape = CircleShape,
                 containerColor = Color(0xFF34D399)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.Black)
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.home_fab_add), tint = Color.Black)
             }
         }
     ) { innerPadding ->
@@ -142,7 +144,7 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = koin
             when (selectedItemIndex) {
                 0 -> HomeContent(navController = navController, homeViewModel = homeViewModel)
                 1 -> SearchScreen(navController = navController, viewModel = koinViewModel())
-                2 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = BottomNavItem.Rewards.title) }
+                2 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = stringResource(R.string.home_bottom_nav_rewards)) }
                 3 -> ProfileScreen(
                     onLogout = {
                         navController.navigate("login") {
@@ -193,14 +195,14 @@ fun HomeContent(navController: NavController, homeViewModel: HomeViewModel) {
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Reúne a las mascotas con sus familias",
+                    text = stringResource(R.string.home_title),
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Conecta con una comunidad que se preocupa. Encuentra mascotas perdidas y ayuda a otros con recompensas justas.",
+                    text = stringResource(R.string.home_subtitle),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 16.dp)
@@ -212,7 +214,7 @@ fun HomeContent(navController: NavController, homeViewModel: HomeViewModel) {
                 ) {
                     Icon(imageVector = Icons.Default.Search, contentDescription = "Search Icon")
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Buscar Mascotas")
+                    Text(text = stringResource(R.string.home_search_pets_button))
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
@@ -221,7 +223,7 @@ fun HomeContent(navController: NavController, homeViewModel: HomeViewModel) {
                 ) {
                     Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "Report Icon")
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Reportar Perdido")
+                    Text(text = stringResource(R.string.home_report_lost_button))
                 }
             }
         }
@@ -233,9 +235,9 @@ fun HomeContent(navController: NavController, homeViewModel: HomeViewModel) {
                     .padding(vertical = 16.dp, horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                StatCard(modifier = Modifier.weight(1f), value = "1,247", label = "Mascotas Reunidas")
-                StatCard(modifier = Modifier.weight(1f), value = "45.6", label = "ETH en Recompensas")
-                StatCard(modifier = Modifier.weight(1f), value = "892", label = "Usuarios Activos")
+                StatCard(modifier = Modifier.weight(1f), value = "1,247", label = stringResource(R.string.home_stat_pets_reunited))
+                StatCard(modifier = Modifier.weight(1f), value = "45.6", label = stringResource(R.string.home_stat_eth_in_rewards))
+                StatCard(modifier = Modifier.weight(1f), value = "892", label = stringResource(R.string.home_stat_active_users))
             }
         }
 
@@ -246,12 +248,12 @@ fun HomeContent(navController: NavController, homeViewModel: HomeViewModel) {
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Mascotas Reportadas Recientemente",
+                    text = stringResource(R.string.home_recently_reported_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Ayuda a reunirlas con sus familias",
+                    text = stringResource(R.string.home_recently_reported_subtitle),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -282,7 +284,7 @@ fun HomeContent(navController: NavController, homeViewModel: HomeViewModel) {
                 onClick = { /* TODO: Navigate to all pets screen */ },
                 modifier = Modifier.padding(top = 16.dp)
             ) {
-                Text(text = "Ver Todas las Mascotas")
+                Text(text = stringResource(R.string.home_view_all_pets_button))
             }
         }
 
@@ -294,30 +296,30 @@ fun HomeContent(navController: NavController, homeViewModel: HomeViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "¿Cómo Funciona?",
+                    text = stringResource(R.string.home_how_it_works_title),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Tres simples pasos para reunir mascotas con sus familias",
+                    text = stringResource(R.string.home_how_it_works_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 HowItWorksStep(
                     icon = { Icon(Icons.Default.Search, "Report") },
-                    title = "Reporta",
-                    description = "Reporta tu mascota perdida o una que hayas encontrado con fotos y detalles."
+                    title = stringResource(R.string.home_how_it_works_step1_title),
+                    description = stringResource(R.string.home_how_it_works_step1_desc)
                 )
                 HowItWorksStep(
                     icon = { Icon(Icons.Default.Person, "Connect") },
-                    title = "Conecta",
-                    description = "Nuestra comunidad ayuda a encontrar coincidencias y conectar dueños."
+                    title = stringResource(R.string.home_how_it_works_step2_title),
+                    description = stringResource(R.string.home_how_it_works_step2_desc)
                 )
                 HowItWorksStep(
                     icon = { Icon(Icons.Default.Star, "Reward") },
-                    title = "Recompensa",
-                    description = "Recibe recompensas en tokens HELP por ayudar a reunir mascotas."
+                    title = stringResource(R.string.home_how_it_works_step3_title),
+                    description = stringResource(R.string.home_how_it_works_step3_desc)
                 )
             }
         }
@@ -329,9 +331,9 @@ fun HomeContent(navController: NavController, homeViewModel: HomeViewModel) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("100% Seguro", modifier = Modifier.padding(4.dp))
-                Text("Comunidad Verificada", modifier = Modifier.padding(4.dp))
-                Text("Recompensas Justas", modifier = Modifier.padding(4.dp))
+                Text(stringResource(R.string.home_feature1), modifier = Modifier.padding(4.dp))
+                Text(stringResource(R.string.home_feature2), modifier = Modifier.padding(4.dp))
+                Text(stringResource(R.string.home_feature3), modifier = Modifier.padding(4.dp))
             }
         }
     }
@@ -446,7 +448,7 @@ fun PetCard(pet: Pet, onDetailClick: (Pet) -> Unit) {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedButton(onClick = { onDetailClick(pet) }) {
-                    Text(text = "Ver Detalles")
+                    Text(text = stringResource(R.string.pet_card_view_details_button))
                 }
             }
         }
