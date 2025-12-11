@@ -44,7 +44,7 @@ class LoginRepositoryImpl(
     }
 
     override suspend fun isUserLoggedIn(): Boolean {
-        return authTokenDao.getToken() != null
+        return remoteDataSource.isFirebaseUserLoggedIn() && authTokenDao.getToken() != null
     }
 
     override suspend fun logout() {
