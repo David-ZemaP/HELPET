@@ -10,16 +10,19 @@ data class Pet(
     val size: String = "", // Pequeño, Mediano, Grande
     val location: String = "", // Dirección/Zona
     val city: String = "",
-    val lastSeenDate: String = "", // Timestamp or String date
+    val lastSeenDate: String = "", // String date formateada
     val description: String = "",
     val additionalInfo: String = "",
-    val status: String = "Perdido", // Perdido vs Encontrado
+    val status: String = "Perdido", // Perdido, Encontrado, Adopción
     val imageUrl: String = "",
     val ownerId: String = "",
 
+    // Contacto
     val contactName: String = "",
     val contactPhone: String = "",
     val contactEmail: String = "",
+
+    // Recompensa y Metadata
     val hasReward: Boolean = false,
     val timestamp: Long = System.currentTimeMillis()
 )

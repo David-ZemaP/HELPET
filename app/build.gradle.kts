@@ -57,7 +57,7 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -92,9 +92,12 @@ dependencies {
     // Dependencia Material3 XML (necesaria para Theme.Material3.*)
     implementation(libs.material)
 
+    implementation(libs.firebase.firestore) // Base de datos
+    implementation(libs.firebase.storage)
+
     // Local DB Room
     implementation(libs.bundles.local)
-    annotationProcessor(libs.room.compiler)
+    // annotationProcessor(libs.room.compiler)
     ksp(libs.room.compiler)
     testImplementation(libs.room.testing)
 
@@ -116,3 +119,4 @@ dependencies {
     androidTestImplementation(libs.koin.test.junit4)
 
 }
+
