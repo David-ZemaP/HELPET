@@ -69,6 +69,7 @@ import com.google.gson.Gson
 import com.ucb.helpet.R
 import com.ucb.helpet.features.home.domain.model.Pet
 import com.ucb.helpet.features.profile.presentation.ProfileScreen
+import com.ucb.helpet.features.rewards.presentation.RewardsScreen
 import com.ucb.helpet.features.search.presentation.SearchScreen
 import org.koin.androidx.compose.koinViewModel
 
@@ -144,7 +145,7 @@ fun HomeScreen(navController: NavController, homeViewModel: HomeViewModel = koin
             when (selectedItemIndex) {
                 0 -> HomeContent(navController = navController, homeViewModel = homeViewModel)
                 1 -> SearchScreen(navController = navController, viewModel = koinViewModel())
-                2 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(text = stringResource(R.string.home_bottom_nav_rewards)) }
+                2 -> RewardsScreen()
                 3 -> ProfileScreen(
                     onLogout = {
                         navController.navigate("login") {
