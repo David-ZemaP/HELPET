@@ -187,6 +187,7 @@
     <string name="rewards_wallet_stats_tokens_this_month">Tokens Este Mes:</string>
     <string name="rewards_wallet_stats_avg_per_pet">Promedio por Mascota:</string>
     <string name="rewards_wallet_stats_best_reward">Mejor Recompensa:</string>
+    <string name="login_google_icon">G</string>
     <string-array name="animal_types">
         <item>Perro</item>
         <item>Gato</item>

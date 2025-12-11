@@ -222,7 +222,7 @@ fun LoginScreen(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            "G",
+                            stringResource(R.string.login_google_icon),
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground,
                             fontSize = 18.sp
