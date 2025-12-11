@@ -86,11 +86,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
 
-
-    implementation(libs.firebase.database)
-    implementation(libs.firebase.messaging)
-    implementation(libs.firebase.auth)
-
     // Dependencia Material3 XML (necesaria para Theme.Material3.*)
     implementation(libs.material)
 
@@ -108,6 +103,7 @@ dependencies {
     testImplementation(libs.turbine)
     implementation(libs.androidx.material.icons.extended.android)
 
+    // Correct Firebase setup using the BOM platform and the bundle
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)
 

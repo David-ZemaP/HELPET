@@ -178,6 +178,7 @@ fun HomeContent(
     onSearchPetsClick: () -> Unit
 ) {
     val uiState by homeViewModel.uiState.collectAsState()
+    val homeScreenTitle by homeViewModel.homeScreenTitle
 
     LazyColumn(
         modifier = Modifier
@@ -207,7 +208,7 @@ fun HomeContent(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = stringResource(R.string.home_title),
+                    text = homeScreenTitle,
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center

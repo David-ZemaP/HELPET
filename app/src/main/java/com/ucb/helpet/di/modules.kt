@@ -84,7 +84,7 @@ val appModule = module {
     viewModel { SplashViewModel(get()) }
     viewModel { ProfileViewModel(get(), get(), get()) }
     viewModel { SearchViewModel(get()) }
-    viewModel { HomeViewModel(get()) }
+    viewModel { HomeViewModel(get(), get()) }
 
     // FIX: Inject LoginRepository (the second 'get()') to fetch User ID
     viewModel { ReportPetViewModel(androidApplication(), get(), get(), get()) }
