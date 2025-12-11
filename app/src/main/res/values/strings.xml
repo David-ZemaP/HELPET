@@ -53,6 +53,7 @@
     <string name="forgot_password_email_label">Email</string>
     <string name="forgot_password_send_link_button">Enviar Enlace</string>
     <string name="forgot_password_back_to_login">Volver al inicio de sesión</string>
+    <string name="forgot_password_success_message">Se ha enviado un correo electrónico para restablecer tu contraseña. Revisa tu bandeja de entrada.</string>
     <string name="home_bottom_nav_home">Inicio</string>
     <string name="home_bottom_nav_search">Buscar</string>
     <string name="home_bottom_nav_rewards">Recompensas</string>
