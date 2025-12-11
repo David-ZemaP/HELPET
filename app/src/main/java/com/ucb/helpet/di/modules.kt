@@ -91,7 +91,6 @@ val appModule = module {
     viewModel { ProfileViewModel(get(), get(), get()) }
     viewModel { SearchViewModel(get()) }
     viewModel { HomeViewModel(get(), get()) }
-    viewModel { HomeViewModel(get()) }
     viewModel { RewardsViewModel(get()) }
 
     // FIX: Inject LoginRepository (the second 'get()') to fetch User ID
