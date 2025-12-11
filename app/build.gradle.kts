@@ -92,12 +92,8 @@ dependencies {
     // Dependencia Material3 XML (necesaria para Theme.Material3.*)
     implementation(libs.material)
 
-    implementation(libs.firebase.firestore) // Base de datos
-    implementation(libs.firebase.storage)
-
     // Local DB Room
     implementation(libs.bundles.local)
-    // annotationProcessor(libs.room.compiler)
     ksp(libs.room.compiler)
     testImplementation(libs.room.testing)
 
@@ -119,4 +115,3 @@ dependencies {
     androidTestImplementation(libs.koin.test.junit4)
 
 }
-

@@ -1,9 +1,7 @@
 package com.ucb.helpet.di
 
-// 1. Asegúrate de tener estos imports de Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-
 import com.google.android.gms.auth.api.identity.Identity
 import com.ucb.helpet.features.home.data.datasource.PetRemoteDataSource
 import com.ucb.helpet.features.home.domain.repository.PetRepository
@@ -40,6 +38,7 @@ import com.ucb.helpet.features.rewards.domain.usecase.GetAvailableRewardsUseCase
 import com.ucb.helpet.features.rewards.presentation.RewardsViewModel
 import com.ucb.helpet.features.splash.presentation.SplashViewModel
 import com.ucb.helpet.features.search.presentation.SearchViewModel
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -47,12 +46,11 @@ import org.koin.dsl.module
 
 val appModule = module {
 
-    // --- FIREBASE (Definidos correctamente en Koin) ---
+    // --- FIREBASE ---
     single { FirebaseService() }
-    // Instancia Singleton de Firestore
     single { FirebaseFirestore.getInstance() }
-    // Instancia Singleton de Storage
     single { FirebaseStorage.getInstance() }
+    single { FirebaseRemoteConfig.getInstance() }
 
     // --- DATABASE ---
     single { AppDatabase.getDatabase(androidContext()) }
@@ -74,12 +72,7 @@ val appModule = module {
 
     // --- REPOSITORIES ---
     single<LoginRepository> { LoginRepositoryImpl(get(), get()) }
-
-    // CORRECCIÓN AQUÍ:
-    // Al usar dos 'get()', Koin buscará automáticamente FirebaseFirestore y FirebaseStorage
-    // que definimos arriba y los inyectará en el constructor de PetRepositoryImpl.
-    single<PetRepository> { PetRepositoryImpl(get(), get()) }
-
+    single<PetRepository> { PetRepositoryImpl(get()) }
     single<RewardsRepository> { RewardsRepositoryImpl(get()) }
 
     // --- USECASES ---
@@ -89,13 +82,10 @@ val appModule = module {
     factory { IsUserLoggedInUseCase(get()) }
     factory { LogoutUseCase(get()) }
     factory { GetUserProfileUseCase(get()) }
-
-    // UseCases de Pets
-    factory { ReportPetUseCase(get()) } // Asumo que el constructor solo pide el repo
+    factory { ReportPetUseCase(get(), get()) }
     factory { GetUserPetsUseCase(get()) }
     factory { GetPetByIdUseCase(get()) }
     factory { GetAllPetsUseCase(get()) }
-
     factory { GetAvailableRewardsUseCase(get()) }
 
     // --- VIEWMODELS ---
@@ -107,9 +97,6 @@ val appModule = module {
     viewModel { SearchViewModel(get()) }
     viewModel { HomeViewModel(get(), get()) }
     viewModel { RewardsViewModel(get()) }
-
-    // Aquí también corregí la inyección del ReportPetViewModel si fuera necesario
-    // Asegúrate que los argumentos coincidan con el constructor de tu ViewModel
-    viewModel { ReportPetViewModel(get()) }
+    viewModel { ReportPetViewModel(androidApplication(), get(), get(), get()) }
     viewModel { PetDetailViewModel(get()) }
 }
