@@ -80,4 +80,13 @@ class FakePetRepository : PetRepository {
         // Not needed for this test, can return an empty flow
         return flowOf(Resource.Success(emptyList()))
     }
+
+    override suspend fun getPetById(petId: String): Resource<Pet> {
+        val pet = pets?.find { it.id == petId }
+        return if (pet != null) {
+            Resource.Success(pet)
+        } else {
+            Resource.Error("Pet not found")
+        }
+    }
 }
