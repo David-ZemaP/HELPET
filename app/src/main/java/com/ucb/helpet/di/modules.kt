@@ -30,6 +30,10 @@ import com.ucb.helpet.features.login.presentation.google.GoogleAuthUiClient
 import com.ucb.helpet.features.login.presentation.register.RegisterViewModel
 import com.ucb.helpet.features.notifications.NotificationHelper
 import com.ucb.helpet.features.profile.presentation.ProfileViewModel
+import com.ucb.helpet.features.rewards.data.repository.RewardsRepositoryImpl
+import com.ucb.helpet.features.rewards.domain.repository.RewardsRepository
+import com.ucb.helpet.features.rewards.domain.usecase.GetAvailableRewardsUseCase
+import com.ucb.helpet.features.rewards.presentation.RewardsViewModel
 import com.ucb.helpet.features.splash.presentation.SplashViewModel
 import com.ucb.helpet.features.search.presentation.SearchViewModel
 import org.koin.android.ext.koin.androidApplication
@@ -64,6 +68,7 @@ val appModule = module {
     // Repositories
     single<LoginRepository> { LoginRepositoryImpl(get(), get()) }
     single<PetRepository> { PetRepositoryImpl(get()) }
+    single<RewardsRepository> { RewardsRepositoryImpl(get()) }
 
     // UseCases
     factory { RegisterUserUseCase(get()) }
@@ -76,6 +81,7 @@ val appModule = module {
     factory { GetUserPetsUseCase(get()) }
     factory { GetPetByIdUseCase(get()) }
     factory { GetAllPetsUseCase(get()) }
+    factory { GetAvailableRewardsUseCase(get()) }
 
     // ViewModels
     viewModel { LoginViewModel(androidApplication(), get(), get(), get()) }
@@ -85,6 +91,8 @@ val appModule = module {
     viewModel { ProfileViewModel(get(), get(), get()) }
     viewModel { SearchViewModel(get()) }
     viewModel { HomeViewModel(get(), get()) }
+    viewModel { HomeViewModel(get()) }
+    viewModel { RewardsViewModel(get()) }
 
     // FIX: Inject LoginRepository (the second 'get()') to fetch User ID
     viewModel { ReportPetViewModel(androidApplication(), get(), get(), get()) }
