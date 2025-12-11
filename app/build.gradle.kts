@@ -67,6 +67,9 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.foundation)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -103,8 +106,13 @@ dependencies {
     testImplementation(libs.turbine)
     implementation(libs.androidx.material.icons.extended.android)
 
+
     // Correct Firebase setup using the BOM platform and the bundle
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)
+
+    // Koin testing for instrumented tests
+    androidTestImplementation(libs.koin.test)
+    androidTestImplementation(libs.koin.test.junit4)
 
 }

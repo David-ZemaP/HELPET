@@ -1,6 +1,7 @@
 package com.ucb.helpet.features.home.presentation
 
 import app.cash.turbine.test
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.ucb.helpet.features.home.domain.model.Pet
 import com.ucb.helpet.features.home.domain.usecase.GetAllPetsUseCase
 import com.ucb.helpet.utils.Resource
@@ -22,6 +23,7 @@ import org.junit.Test
 class HomeViewModelTest {
 
     private lateinit var getAllPetsUseCase: GetAllPetsUseCase
+    private lateinit var remoteConfig: FirebaseRemoteConfig
     private lateinit var viewModel: HomeViewModel
     private val testDispatcher = StandardTestDispatcher()
 
@@ -29,6 +31,7 @@ class HomeViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         getAllPetsUseCase = mockk(relaxed = true)
+        remoteConfig = mockk(relaxed = true)
     }
 
     @After
@@ -50,7 +53,7 @@ class HomeViewModelTest {
         every { getAllPetsUseCase() } returns flowOf(Resource.Success(pets))
 
         // When
-        viewModel = HomeViewModel(getAllPetsUseCase)
+        viewModel = HomeViewModel(getAllPetsUseCase, remoteConfig)
         viewModel.uiState.test {
             // Then
             assertEquals(HomeUiState.Loading, awaitItem())
@@ -68,7 +71,7 @@ class HomeViewModelTest {
         every { getAllPetsUseCase() } returns flowOf(Resource.Error(errorMessage))
 
         // When
-        viewModel = HomeViewModel(getAllPetsUseCase)
+        viewModel = HomeViewModel(getAllPetsUseCase, remoteConfig)
         viewModel.uiState.test {
             // Then
             assertEquals(HomeUiState.Loading, awaitItem())
@@ -84,7 +87,7 @@ class HomeViewModelTest {
         every { getAllPetsUseCase() } returns flowOf(Resource.Loading)
 
         // When
-        viewModel = HomeViewModel(getAllPetsUseCase)
+        viewModel = HomeViewModel(getAllPetsUseCase, remoteConfig)
         viewModel.uiState.test {
             // Then
             assertEquals(HomeUiState.Loading, awaitItem())
