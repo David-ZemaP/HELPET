@@ -84,7 +84,7 @@ val appModule = module {
     factory { IsUserLoggedInUseCase(get()) }
     factory { LogoutUseCase(get()) }
     factory { GetUserProfileUseCase(get()) }
-    factory { ReportPetUseCase(get(), get()) }
+    factory { ReportPetUseCase(get(), get(), get()) }
     factory { GetUserPetsUseCase(get()) }
     factory { GetPetByIdUseCase(get()) }
     factory { GetAllPetsUseCase(get()) }
@@ -99,6 +99,6 @@ val appModule = module {
     viewModel { SearchViewModel(get()) }
     viewModel { HomeViewModel(get(), get()) }
     viewModel { RewardsViewModel(get()) }
-    viewModel { ReportPetViewModel(androidApplication(), get(), get(), get(), get()) }
+    viewModel { ReportPetViewModel(androidApplication(), get(), get()) }
     viewModel { PetDetailViewModel(get()) }
 }

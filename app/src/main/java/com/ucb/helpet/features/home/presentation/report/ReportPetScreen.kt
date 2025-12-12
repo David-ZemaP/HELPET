@@ -1,7 +1,11 @@
 package com.ucb.helpet.features.home.presentation.report
 
 import android.Manifest
+import android.content.ContentValues
+import android.content.Context
 import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,6 +41,8 @@ import coil3.compose.AsyncImage
 import com.ucb.helpet.R
 import com.ucb.helpet.features.home.domain.model.Pet
 import org.koin.androidx.compose.getViewModel
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,12 +96,22 @@ fun ReportPetScreen(
             imageUri = uri
         }
     )
+    
+    fun createImageUri(context: Context): Uri? {
+        val contentValues = ContentValues().apply {
+            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            put(MediaStore.MediaColumns.DISPLAY_NAME, "JPEG_${timeStamp}_")
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+        }
+        return context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+    }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success: Boolean ->
             if (success) {
-                // The URI is already available in the imageUri state if you passed it to the contract
+                // The URI is already available in the imageUri state
             }
         }
     )
@@ -105,7 +121,11 @@ fun ReportPetScreen(
         onResult = { isGranted: Boolean ->
             if (isGranted) {
                 // The camera can now be launched
-                showImageSourceDialog = true
+                val newImageUri = createImageUri(context)
+                if (newImageUri != null) {
+                    imageUri = newImageUri
+                    cameraLauncher.launch(newImageUri)
+                }
             } else {
                 Toast.makeText(context, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show()
             }
@@ -127,7 +147,7 @@ fun ReportPetScreen(
             title = { Text("Seleccionar fuente de imagen") },
             text = { Text("¿De dónde quieres obtener la imagen?") },
             confirmButton = {
-                Button(onClick = { 
+                Button(onClick = {
                     showImageSourceDialog = false
                     imagePickerLauncher.launch("image/*")
                 }) {
@@ -135,7 +155,7 @@ fun ReportPetScreen(
                 }
             },
             dismissButton = {
-                Button(onClick = { 
+                Button(onClick = {
                     showImageSourceDialog = false
                     permissionLauncher.launch(Manifest.permission.CAMERA)
                 }) {
@@ -454,7 +474,7 @@ fun ExposedDropdown(
         ) {
             OutlinedTextField(
                 value = if (selectedOption.isEmpty()) stringResource(R.string.register_user_type_placeholder) else selectedOption,
-                onValueChange = {},
+                onValueChange = { },
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 modifier = Modifier

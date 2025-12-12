@@ -5,10 +5,8 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ucb.helpet.R
-import com.ucb.helpet.features.home.data.datasource.StorageDataSource
 import com.ucb.helpet.features.home.domain.model.Pet
-import com.ucb.helpet.features.home.domain.repository.PetRepository
-import com.ucb.helpet.features.login.domain.repository.LoginRepository
+import com.ucb.helpet.features.home.domain.usecase.ReportPetUseCase
 import com.ucb.helpet.features.notifications.NotificationHelper
 import com.ucb.helpet.utils.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,10 +22,8 @@ sealed class ReportPetUiState {
 
 class ReportPetViewModel(
     application: Application,
-    private val repository: PetRepository,
-    private val loginRepository: LoginRepository,
+    private val reportPetUseCase: ReportPetUseCase,
     private val notificationHelper: NotificationHelper,
-    private val storageDataSource: StorageDataSource
 ) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow<ReportPetUiState>(ReportPetUiState.Idle)
@@ -42,39 +38,13 @@ class ReportPetViewModel(
                 return@launch
             }
 
-            try {
-                var imageUrl = if (pet.imageUrl.isBlank()) "https://i.imgur.com/8zQ2X9C.png" else pet.imageUrl
-
-                if (imageUri != null) {
-                    try {
-                        imageUrl = storageDataSource.uploadPetImage(imageUri)
-                    } catch (e: Exception) {
-                        _uiState.value = ReportPetUiState.Error("Error al subir la imagen: ${e.message}")
-                        return@launch
-                    }
+            when (val result = reportPetUseCase(pet, imageUri)) {
+                is Resource.Success -> {
+                    _uiState.value = ReportPetUiState.Success
+                    notificationHelper.showPetPublishedNotification(pet.name)
                 }
-
-                var ownerId = ""
-                val userProfile = loginRepository.getUserProfile()
-                if (userProfile is Resource.Success) {
-                    ownerId = userProfile.data.userId
-                }
-
-                val finalPet = pet.copy(
-                    ownerId = ownerId,
-                    imageUrl = imageUrl
-                )
-
-                when (val result = repository.reportPet(finalPet)) {
-                    is Resource.Success -> {
-                        _uiState.value = ReportPetUiState.Success
-                        notificationHelper.showPetPublishedNotification(finalPet.name)
-                    }
-                    is Resource.Error -> _uiState.value = ReportPetUiState.Error(result.message)
-                    else -> {}
-                }
-            } catch (e: Exception) {
-                _uiState.value = ReportPetUiState.Error(e.message ?: getApplication<Application>().getString(R.string.error_unknown))
+                is Resource.Error -> _uiState.value = ReportPetUiState.Error(result.message)
+                else -> {}
             }
         }
     }
