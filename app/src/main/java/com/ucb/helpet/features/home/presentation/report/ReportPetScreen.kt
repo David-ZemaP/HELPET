@@ -25,7 +25,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -41,6 +40,8 @@ import coil3.compose.AsyncImage
 import com.ucb.helpet.R
 import com.ucb.helpet.features.home.domain.model.Pet
 import org.koin.androidx.compose.getViewModel
+import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -93,19 +94,11 @@ fun ReportPetScreen(
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri: Uri? ->
-            imageUri = uri
+            uri?.let {
+                imageUri = copyUriToMediaStore(context, it)
+            }
         }
     )
-    
-    fun createImageUri(context: Context): Uri? {
-        val contentValues = ContentValues().apply {
-            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-            put(MediaStore.MediaColumns.DISPLAY_NAME, "JPEG_${timeStamp}_")
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
-        }
-        return context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-    }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
@@ -392,6 +385,36 @@ fun ReportPetScreen(
         }
     }
 }
+
+// --- FILE UTILITY FUNCTIONS -- -
+
+private fun createImageUri(context: Context): Uri? {
+    val contentValues = ContentValues().apply {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        put(MediaStore.MediaColumns.DISPLAY_NAME, "JPEG_${timeStamp}_.jpg")
+        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+    }
+    return context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+}
+
+private fun copyUriToMediaStore(context: Context, uri: Uri): Uri? {
+    val newUri = createImageUri(context)
+    return try {
+        context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            context.contentResolver.openOutputStream(newUri!!).use { outputStream ->
+                inputStream.copyTo(outputStream!!)
+            }
+        }
+        newUri
+    } catch (e: Exception) {
+        e.printStackTrace()
+        // If the copy fails, delete the created URI entry
+        newUri?.let { context.contentResolver.delete(it, null, null) }
+        null
+    }
+}
+
 
 // --- HELPER COMPOSABLES ---
 
