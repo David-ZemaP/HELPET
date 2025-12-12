@@ -4,6 +4,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.android.gms.auth.api.identity.Identity
 import com.ucb.helpet.features.home.data.datasource.PetRemoteDataSource
+import com.ucb.helpet.features.home.data.datasource.StorageDataSource
 import com.ucb.helpet.features.home.domain.repository.PetRepository
 import com.ucb.helpet.features.home.domain.repository.PetRepositoryImpl
 import com.ucb.helpet.features.home.domain.usecase.GetPetByIdUseCase
@@ -66,6 +67,7 @@ val appModule = module {
     // --- DATASOURCES ---
     single { LoginRemoteDataSource(get()) }
     single { PetRemoteDataSource() }
+    single { StorageDataSource() }
 
     // --- HELPERS ---
     single { NotificationHelper(androidContext()) }
@@ -97,6 +99,6 @@ val appModule = module {
     viewModel { SearchViewModel(get()) }
     viewModel { HomeViewModel(get(), get()) }
     viewModel { RewardsViewModel(get()) }
-    viewModel { ReportPetViewModel(androidApplication(), get(), get(), get()) }
+    viewModel { ReportPetViewModel(androidApplication(), get(), get(), get(), get()) }
     viewModel { PetDetailViewModel(get()) }
 }

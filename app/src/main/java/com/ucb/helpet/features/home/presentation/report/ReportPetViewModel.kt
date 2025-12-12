@@ -1,9 +1,11 @@
 package com.ucb.helpet.features.home.presentation.report
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ucb.helpet.R
+import com.ucb.helpet.features.home.data.datasource.StorageDataSource
 import com.ucb.helpet.features.home.domain.model.Pet
 import com.ucb.helpet.features.home.domain.repository.PetRepository
 import com.ucb.helpet.features.login.domain.repository.LoginRepository
@@ -23,14 +25,15 @@ sealed class ReportPetUiState {
 class ReportPetViewModel(
     application: Application,
     private val repository: PetRepository,
-    private val loginRepository: LoginRepository, // Changed from IRepositoryDataStore
-    private val notificationHelper: NotificationHelper
+    private val loginRepository: LoginRepository,
+    private val notificationHelper: NotificationHelper,
+    private val storageDataSource: StorageDataSource
 ) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow<ReportPetUiState>(ReportPetUiState.Idle)
     val uiState: StateFlow<ReportPetUiState> = _uiState
 
-    fun reportPet(pet: Pet) {
+    fun reportPet(pet: Pet, imageUri: Uri?) {
         viewModelScope.launch {
             _uiState.value = ReportPetUiState.Loading
 
@@ -40,7 +43,17 @@ class ReportPetViewModel(
             }
 
             try {
-                // Get the real User ID from the active session
+                var imageUrl = if (pet.imageUrl.isBlank()) "https://i.imgur.com/8zQ2X9C.png" else pet.imageUrl
+
+                if (imageUri != null) {
+                    try {
+                        imageUrl = storageDataSource.uploadPetImage(imageUri)
+                    } catch (e: Exception) {
+                        _uiState.value = ReportPetUiState.Error("Error al subir la imagen: ${e.message}")
+                        return@launch
+                    }
+                }
+
                 var ownerId = ""
                 val userProfile = loginRepository.getUserProfile()
                 if (userProfile is Resource.Success) {
@@ -49,8 +62,7 @@ class ReportPetViewModel(
 
                 val finalPet = pet.copy(
                     ownerId = ownerId,
-                    // Placeholder image until Storage is implemented
-                    imageUrl = if(pet.imageUrl.isBlank()) "https://i.imgur.com/8zQ2X9C.png" else pet.imageUrl
+                    imageUrl = imageUrl
                 )
 
                 when (val result = repository.reportPet(finalPet)) {
