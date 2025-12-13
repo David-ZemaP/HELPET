@@ -57,7 +57,7 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -94,7 +94,6 @@ dependencies {
 
     // Local DB Room
     implementation(libs.bundles.local)
-    annotationProcessor(libs.room.compiler)
     ksp(libs.room.compiler)
     testImplementation(libs.room.testing)
 

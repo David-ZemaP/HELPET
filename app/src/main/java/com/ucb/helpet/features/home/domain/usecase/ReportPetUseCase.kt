@@ -1,35 +1,44 @@
 package com.ucb.helpet.features.home.domain.usecase
 
+import android.net.Uri
+import com.ucb.helpet.features.home.data.datasource.StorageDataSource
 import com.ucb.helpet.features.home.domain.model.Pet
 import com.ucb.helpet.features.home.domain.repository.PetRepository
-import com.ucb.helpet.features.login.domain.repository.IRepositoryDataStore
+import com.ucb.helpet.features.login.domain.repository.LoginRepository
 import com.ucb.helpet.utils.Resource
+import java.lang.Exception
 
 class ReportPetUseCase(
     private val repository: PetRepository,
-    private val dataStore: IRepositoryDataStore
+    private val loginRepository: LoginRepository,
+    private val storageDataSource: StorageDataSource,
 ) {
-    suspend operator fun invoke(
-        name: String,
-        type: String,
-        location: String,
-        description: String,
-        status: String
-    ): Resource<Unit> {
-        val ownerId = dataStore.getToken()
+    suspend operator fun invoke(pet: Pet, imageUri: Uri?): Resource<Unit> {
+        try {
+            var imageUrl = if (pet.imageUrl.isBlank()) "https://i.imgur.com/8zQ2X9C.png" else pet.imageUrl
 
+            if (imageUri != null) {
+                try {
+                    imageUrl = storageDataSource.uploadPetImage(imageUri)
+                } catch (e: Exception) {
+                    return Resource.Error("Error al subir la imagen: ${e.message}")
+                }
+            }
 
-        val placeholderImage = "https://i.imgur.com/8zQ2X9C.png"
+            val userProfile = loginRepository.getUserProfile()
+            val ownerId = (userProfile as? Resource.Success)?.data?.userId
 
-        val pet = Pet(
-            name = name,
-            type = type,
-            location = location,
-            description = description,
-            status = status,
-            imageUrl = placeholderImage,
-            ownerId = ownerId
-        )
-        return repository.reportPet(pet)
+            if (ownerId.isNullOrBlank()) {
+                return Resource.Error("Usuario no autenticado.")
+            }
+
+            val finalPet = pet.copy(
+                ownerId = ownerId,
+                imageUrl = imageUrl
+            )
+            return repository.reportPet(finalPet)
+        } catch (e: Exception) {
+            return Resource.Error(e.message ?: "Ocurrió un error desconocido")
+        }
     }
 }

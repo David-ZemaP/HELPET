@@ -1,7 +1,10 @@
 package com.ucb.helpet.di
 
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.google.android.gms.auth.api.identity.Identity
 import com.ucb.helpet.features.home.data.datasource.PetRemoteDataSource
+import com.ucb.helpet.features.home.data.datasource.StorageDataSource
 import com.ucb.helpet.features.home.domain.repository.PetRepository
 import com.ucb.helpet.features.home.domain.repository.PetRepositoryImpl
 import com.ucb.helpet.features.home.domain.usecase.GetPetByIdUseCase
@@ -36,54 +39,58 @@ import com.ucb.helpet.features.rewards.domain.usecase.GetAvailableRewardsUseCase
 import com.ucb.helpet.features.rewards.presentation.RewardsViewModel
 import com.ucb.helpet.features.splash.presentation.SplashViewModel
 import com.ucb.helpet.features.search.presentation.SearchViewModel
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
-
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
 
-    // Firebase
+    // --- FIREBASE ---
     single { FirebaseService() }
+    single { FirebaseFirestore.getInstance() }
+    single { FirebaseStorage.getInstance() }
+    single { FirebaseRemoteConfig.getInstance() }
 
-    // Database
+    // --- DATABASE ---
     single { AppDatabase.getDatabase(androidContext()) }
     single { get<AppDatabase>().authTokenDao() }
 
-    // DataStore
+    // --- DATASTORE ---
     single<IRepositoryDataStore> { LoginDataStore(androidContext()) }
 
-    //Google Auth
+    // --- GOOGLE AUTH ---
     single { Identity.getSignInClient(androidContext()) }
     single { GoogleAuthUiClient(androidContext(), get()) }
 
-    // DataSources
+    // --- DATASOURCES ---
     single { LoginRemoteDataSource(get()) }
     single { PetRemoteDataSource() }
+    single { StorageDataSource() }
 
-    // Helpers
+    // --- HELPERS ---
     single { NotificationHelper(androidContext()) }
 
-    // Repositories
+    // --- REPOSITORIES ---
     single<LoginRepository> { LoginRepositoryImpl(get(), get()) }
     single<PetRepository> { PetRepositoryImpl(get()) }
     single<RewardsRepository> { RewardsRepositoryImpl(get()) }
 
-    // UseCases
+    // --- USECASES ---
     factory { RegisterUserUseCase(get()) }
     factory { ForgotPasswordUseCase(get()) }
     factory { LoginUseCase(get()) }
     factory { IsUserLoggedInUseCase(get()) }
     factory { LogoutUseCase(get()) }
     factory { GetUserProfileUseCase(get()) }
-    factory { ReportPetUseCase(get(), get()) }
+    factory { ReportPetUseCase(get(), get(), get()) }
     factory { GetUserPetsUseCase(get()) }
     factory { GetPetByIdUseCase(get()) }
     factory { GetAllPetsUseCase(get()) }
     factory { GetAvailableRewardsUseCase(get()) }
 
-    // ViewModels
+    // --- VIEWMODELS ---
     viewModel { LoginViewModel(androidApplication(), get(), get(), get()) }
     viewModel { RegisterViewModel(get()) }
     viewModel { ForgotPasswordViewModel(get()) }
@@ -92,8 +99,6 @@ val appModule = module {
     viewModel { SearchViewModel(get()) }
     viewModel { HomeViewModel(get(), get()) }
     viewModel { RewardsViewModel(get()) }
-
-    // FIX: Inject LoginRepository (the second 'get()') to fetch User ID
-    viewModel { ReportPetViewModel(androidApplication(), get(), get(), get()) }
+    viewModel { ReportPetViewModel(androidApplication(), get(), get()) }
     viewModel { PetDetailViewModel(get()) }
 }

@@ -1,6 +1,14 @@
 package com.ucb.helpet.features.home.presentation.report
 
+import android.Manifest
+import android.content.ContentValues
+import android.content.Context
+import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,9 +25,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -28,15 +36,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil3.compose.AsyncImage
 import com.ucb.helpet.R
 import com.ucb.helpet.features.home.domain.model.Pet
-import org.koin.androidx.compose.koinViewModel
+import org.koin.androidx.compose.getViewModel
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportPetScreen(
     navController: NavController,
-    viewModel: ReportPetViewModel = koinViewModel()
+    viewModel: ReportPetViewModel = getViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -71,8 +84,46 @@ fun ReportPetScreen(
     var typeExpanded by remember { mutableStateOf(false) }
     var sizeExpanded by remember { mutableStateOf(false) }
 
+    // Image State
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var showImageSourceDialog by remember { mutableStateOf(false) }
+
     val animalTypes = stringArrayResource(R.array.animal_types).toList()
     val sizes = stringArrayResource(R.array.pet_sizes).toList()
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            uri?.let {
+                imageUri = copyUriToMediaStore(context, it)
+            }
+        }
+    )
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success: Boolean ->
+            if (success) {
+                // The URI is already available in the imageUri state
+            }
+        }
+    )
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted: Boolean ->
+            if (isGranted) {
+                // The camera can now be launched
+                val newImageUri = createImageUri(context)
+                if (newImageUri != null) {
+                    imageUri = newImageUri
+                    cameraLauncher.launch(newImageUri)
+                }
+            } else {
+                Toast.makeText(context, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
 
     // Handle Success
     LaunchedEffect(uiState) {
@@ -81,6 +132,30 @@ fun ReportPetScreen(
             navController.popBackStack()
             viewModel.resetState()
         }
+    }
+
+    if (showImageSourceDialog) {
+        AlertDialog(
+            onDismissRequest = { showImageSourceDialog = false },
+            title = { Text("Seleccionar fuente de imagen") },
+            text = { Text("¿De dónde quieres obtener la imagen?") },
+            confirmButton = {
+                Button(onClick = {
+                    showImageSourceDialog = false
+                    imagePickerLauncher.launch("image/*")
+                }) {
+                    Text("Galería")
+                }
+            },
+            dismissButton = {
+                Button(onClick = {
+                    showImageSourceDialog = false
+                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                }) {
+                    Text("Cámara")
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -124,7 +199,7 @@ fun ReportPetScreen(
                     SelectionCard(
                         title = stringResource(R.string.report_pet_found_pet_option),
                         subtitle = stringResource(R.string.report_pet_found_pet_subtitle),
-                        icon = "\uD83C\uDF89", // Party popper emoji
+                        icon = "🎉", // Party popper emoji
                         isSelected = status == "Encontrado",
                         onClick = { status = "Encontrado" },
                         modifier = Modifier.weight(1f)
@@ -145,13 +220,22 @@ fun ReportPetScreen(
                             shape = RoundedCornerShape(12.dp)
                         )
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
-                        .clickable { /* TODO: Implement Image Picker */ },
+                        .clickable { showImageSourceDialog = true },
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Outlined.FileUpload, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(stringResource(R.string.report_pet_upload_photo_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (imageUri != null) {
+                        AsyncImage(
+                            model = imageUri,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Outlined.FileUpload, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(stringResource(R.string.report_pet_upload_photo_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                 }
             }
@@ -282,7 +366,7 @@ fun ReportPetScreen(
                                 contactEmail = contactEmail,
                                 hasReward = hasReward
                             )
-                            viewModel.reportPet(pet)
+                            viewModel.reportPet(pet, imageUri)
                         },
                         modifier = Modifier.fillMaxWidth().height(50.dp),
                         shape = RoundedCornerShape(12.dp),
@@ -301,6 +385,36 @@ fun ReportPetScreen(
         }
     }
 }
+
+// --- FILE UTILITY FUNCTIONS -- -
+
+private fun createImageUri(context: Context): Uri? {
+    val contentValues = ContentValues().apply {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        put(MediaStore.MediaColumns.DISPLAY_NAME, "JPEG_${timeStamp}_.jpg")
+        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+    }
+    return context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+}
+
+private fun copyUriToMediaStore(context: Context, uri: Uri): Uri? {
+    val newUri = createImageUri(context)
+    return try {
+        context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            context.contentResolver.openOutputStream(newUri!!).use { outputStream ->
+                inputStream.copyTo(outputStream!!)
+            }
+        }
+        newUri
+    } catch (e: Exception) {
+        e.printStackTrace()
+        // If the copy fails, delete the created URI entry
+        newUri?.let { context.contentResolver.delete(it, null, null) }
+        null
+    }
+}
+
 
 // --- HELPER COMPOSABLES ---
 
@@ -383,7 +497,7 @@ fun ExposedDropdown(
         ) {
             OutlinedTextField(
                 value = if (selectedOption.isEmpty()) stringResource(R.string.register_user_type_placeholder) else selectedOption,
-                onValueChange = {},
+                onValueChange = { },
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 modifier = Modifier
