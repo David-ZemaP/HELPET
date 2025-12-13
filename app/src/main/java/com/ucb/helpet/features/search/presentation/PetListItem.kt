@@ -25,8 +25,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.ucb.helpet.features.home.domain.model.Pet
 
 
@@ -41,12 +43,13 @@ fun SearchPetListItem( // FUNCIÓN RENOMBRADA
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
-            // Using a placeholder for the image for now
-            Box(
+            AsyncImage(
+                model = pet.imageUrl,
+                contentDescription = "Foto de ${pet.name}",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
-                    .background(Color.LightGray)
+                    .height(200.dp),
+                contentScale = ContentScale.Crop
             )
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(text = pet.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
